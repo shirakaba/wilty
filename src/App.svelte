@@ -2,9 +2,9 @@
 	import { homeTruths, quickFireLies } from "./data";
 
 	const usedHomeTruths = new Set<string>([]);
-	const unusedHomeTruths = new Set<string>(...homeTruths);
+	const unusedHomeTruths = new Set<string>(homeTruths.keys());
 	const usedQFLs = new Set<string>([]);
-	const unusedQFLs = new Set<string>(...quickFireLies);
+	const unusedQFLs = new Set<string>(quickFireLies.keys());
 
 	let modalVisible: boolean = false;
 
