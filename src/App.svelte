@@ -8,12 +8,24 @@
 		unused: Set<string>,
 	}
 
+    // function addStatementToRecord(playerIndex: number, statement: string): void {
+    //     const { unused, source } = teamStatements[playerIndex];
+    //     unused.add(statement);
+    //     source.add(statement);
+        
+    //     teamStatements = {
+    //         ...teamStatements,
+    //     };
+    // }
+
 	let playerA: number = 0;
 	let playersOnTeamA: string[] = ["Player 1A"];
+	let teamStatementsRawA: string[] = [""];
 	let teamACaptainIndex: number = 0;
 
 	let playerB: number = 0;
 	let playersOnTeamB: string[] = ["Player 1B"];
+	let teamStatementsRawB: string[] = [""];
 	let teamBCaptainIndex: number = 0;
 
 	const homeTruthsCommon: Statements = {
@@ -21,11 +33,11 @@
 		used: new Set<string>(),
 		unused: new Set<string>(homeTruths.keys()),
 	};
-	const homeTruthsA = new Map<number, Statements>();
-	const homeTruthsB = new Map<number, Statements>();
+	const homeTruthsA: Record<number, Statements> = {};
+	const homeTruthsB: Record<number, Statements> = {};
 
-	const QFLsA = new Map<number, Statements>();
-	const QFLsB = new Map<number, Statements>();
+	const QFLsA: Record<number, Statements> = {};
+	const QFLsB: Record<number, Statements> = {};
 	const QFLsCommon: Statements = {
 		source: quickFireLies,
 		used: new Set<string>(),
@@ -41,16 +53,16 @@
 	interface PromptArgs {
 		label: string,
 		team: "A"|"B",
-		player: number,
+		playerIndex: number,
 		commonStatements: Statements,
-		teamStatements: Map<number, Statements>,
+		teamStatements: Record<number, Statements>,
 	}
 
 	function prompt(args: PromptArgs): void {
-		const { label, team, player, commonStatements, teamStatements } = args;
+		const { label, team, playerIndex, commonStatements, teamStatements } = args;
 
 		let item: string;
-		const playerStatements = teamStatements.get(player);
+		const playerStatements = teamStatements[playerIndex];
 	
 		if(playerStatements?.unused.size && Math.random() < 0.5){
 			// Pick a player statement. Player statements may be true or false. Player statements never get shuffled.
@@ -107,6 +119,7 @@
 	
 			<TeamForm
 				playersOnTeam={playersOnTeamA}
+				bind:teamStatementsRaw={teamStatementsRawA}
 				indexOfCaptain={teamACaptainIndex}
 				teamName="A"
 			/>
@@ -117,6 +130,7 @@
 
 			<TeamForm
 				playersOnTeam={playersOnTeamB}
+				bind:teamStatementsRaw={teamStatementsRawB}
 				indexOfCaptain={teamBCaptainIndex}
 				teamName="B"
 			/>
@@ -130,13 +144,13 @@
 	
 	<button
 		class="purpleTeam"
-		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: homeTruthsA, player: playerA, team: "A" })}
+		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: homeTruthsA, playerIndex: playerA, team: "A" })}
 	>
 		Prompt for <strong>Team A</strong>
 	</button>
 	<button
 		class="greenTeam"
-		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: homeTruthsB, player: playerB, team: "B" })}
+		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: homeTruthsB, playerIndex: playerB, team: "B" })}
 	>
 		Prompt for <strong>Team B</strong>
 	</button>
@@ -147,13 +161,13 @@
 
 	<button
 		class="purpleTeam"
-		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: QFLsA, player: playerA, team: "A" })}
+		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: QFLsA, playerIndex: playerA, team: "A" })}
 	>
 		Prompt for <strong>Team A</strong>
 	</button>
 	<button
 		class="greenTeam"
-		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: QFLsB, player: playerB, team: "B" })}
+		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: QFLsB, playerIndex: playerB, team: "B" })}
 	>
 		Prompt for <strong>Team B</strong>
 	</button>

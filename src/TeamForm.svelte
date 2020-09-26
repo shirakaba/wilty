@@ -1,25 +1,35 @@
 <script lang="ts">
     export let indexOfCaptain: number = 0;
     export let playersOnTeam: string[];
+    export let teamStatementsRaw: string[];
     export let teamName: "A"|"B";
 
     function makePlaceholderPlayerName(i: number): string {
         return `Player ${i + 1}${teamName}`;
     }
 
-    function editPlayerName(i: number, value: string){
+    function editPlayerName(i: number, value: string): void {
         playersOnTeam[i] = value;
         playersOnTeam = [...playersOnTeam];
     }
 
-    function addPlayer(){
+    function editStatementList(playerIndex: number, value: string): void {
+        teamStatementsRaw.splice(playerIndex, 1, value);
+        teamStatementsRaw = [...teamStatementsRaw];
+    }
+
+    function addPlayer(): void {
         playersOnTeam = [...playersOnTeam, makePlaceholderPlayerName(playersOnTeam.length)];
+        teamStatementsRaw = [...teamStatementsRaw, ""];
     }
 
     function removePlayer(i: number){
         playersOnTeam.splice(i, 1);
         playersOnTeam = [...playersOnTeam];
         indexOfCaptain = Math.min(indexOfCaptain, playersOnTeam.length - 1);
+
+        teamStatementsRaw.splice(i, 1);
+        teamStatementsRaw = [...teamStatementsRaw];
     }
 </script>
 
@@ -38,6 +48,21 @@
             <label>
                 <input type=radio bind:group={indexOfCaptain} value={i} style="margin-right: 0.8em;">
                 Is team captain?
+            </label>
+        </div>
+
+        <div style="height: 8px;"></div>
+
+        <div>
+            <label style="display: block;">
+                Statements (optional). <em>Separate each statement with <code style="background-color: lightgrey; padding-left: 0.25em; padding-right: 0.25em;">===</code></em>:
+                <textarea
+                    type=textarea
+                    on:input={(e) => editStatementList(i, e.target.value)}
+                    style="display: block;"
+                    value={teamStatementsRaw[i]}
+                    placeholder="I once..."
+                ></textarea>
             </label>
         </div>
 
