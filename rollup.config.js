@@ -5,6 +5,8 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
 import typescript from '@rollup/plugin-typescript';
+import path from 'path';
+import fs from 'fs';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -38,17 +40,6 @@ export default {
 		file: 'public/build/bundle.js'
 	},
 	plugins: [
-		svelte({
-			// enable run-time checks when not in production
-			dev: !production,
-			// we'll extract any component CSS out into
-			// a separate file - better for performance
-			css: css => {
-				css.write('bundle.css');
-			},
-			preprocess: sveltePreprocess(),
-		}),
-
 		// If you have external dependencies installed from
 		// npm, you'll most likely need these plugins. In
 		// some cases you'll need additional configuration -
@@ -64,6 +55,24 @@ export default {
 			inlineSources: !production
 		}),
 
+		svelte({
+			// enable run-time checks when not in production
+			dev: !production,
+			// Inline what used to be separated out as "public/build/bundle.css"
+			css: true,
+			preprocess: sveltePreprocess(),
+		}),
+
+		// If we're building for production (npm run build
+		// instead of npm run dev), minify
+		production && terser(),
+
+		html({
+			pathToTemplateFile: "src/static/template.html",
+			replacementPattern: `<script>/* __REPLACE_ME_WITH_INLINED_JS_BUNDLE__ */</script>`,
+			replacement: production ? "inline" : `<script src="build/bundle.js"></script>`,
+		}),
+
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
 		!production && serve(),
@@ -71,12 +80,38 @@ export default {
 		// Watch the `public` directory and refresh the
 		// browser on changes when not in production
 		!production && livereload('public'),
-
-		// If we're building for production (npm run build
-		// instead of npm run dev), minify
-		production && terser()
 	],
 	watch: {
 		clearScreen: false
 	}
 };
+
+function html(options){
+	const {
+		output = "index.html",
+		pathToTemplateFile,
+		replacementPattern,
+		replacement
+	} = options;
+
+	return {
+		name: 'rollup-plugin-html-inliner',
+		async generateBundle(opts, bundle) {
+			const splits = fs.readFileSync(pathToTemplateFile, 'utf-8').split(replacementPattern);
+			const source = [
+				splits[0],
+				replacement === "inline" ? 
+					`<script>${bundle[path.parse(opts.file).base].code}</script>` : 
+					replacement,
+				splits[1],
+			].join("");
+
+			this.emitFile({
+				type: 'asset',
+				source,
+				name: 'Rollup HTML Asset',
+				fileName: output,
+			});
+		}
+	}
+}

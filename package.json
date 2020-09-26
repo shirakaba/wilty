@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w",
+    "predev": "node ./scripts/predev.js",
+    "dev": "npm run predev && npm run build -- -w",
     "_start": "node app.js",
     "start": "sirv public",
     "validate": "svelte-check"
