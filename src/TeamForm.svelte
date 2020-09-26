@@ -17,8 +17,17 @@
 <div class="paper">
     {#each playersOnTeam as player, i}
         <h4>Player {i + 1}</h4>
-        <label for="name">Name:</label>
-        <input type="text" name="name" value={player}>
+
+        <div>
+            <label for={`team-${teamName}-player-${i}-name`} style="display: block;">Name:</label>
+            <input id={`team-${teamName}-player-${i}-name`} type="text" name={`team-${teamName}-player-${i}-name`} value={player}>
+        </div>
+  
+        <div>
+            <input id={`team-${teamName}-captain-${i}`} type="radio" name={`team-${teamName}-captain`} value={player} checked={i === indexOfCaptain}>
+            <label for={`team-${teamName}-captain-${i}`} style="display: inline-block; margin-left: 0.8em;">Is team captain?</label>
+        </div>
+
         {#if i > 0}
             <button on:click={(e) => removePlayer(i)}>Remove player</button>
         {/if}
