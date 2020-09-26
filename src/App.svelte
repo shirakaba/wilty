@@ -66,13 +66,15 @@
 
 	<p><strong>Home Truths</strong> is the opening round of the show.</p>
 	
-	<button on:click={promptHomeTruth}>Prompt</button>
+	<button class="purpleTeam" on:click={promptHomeTruth}>Prompt for <strong>Team A</strong></button>
+	<button class="greenTeam" on:click={promptHomeTruth}>Prompt for <strong>Team B</strong></button>
 	
 	<h2>Quick-fire Lies</h2>
 	
 	<p><strong>Quick-fire Lies</strong> is the second questioning round.</p>
 
-	<button on:click={promptQFL}>Prompt</button>
+	<button class="purpleTeam" on:click={promptQFL}>Prompt for <strong>Team A</strong></button>
+	<button class="greenTeam" on:click={promptQFL}>Prompt for <strong>Team B</strong></button>
 
 	<footer>
 		<em><small>This website is not affiliated with <em>Would I Lie to You?</em>.</small></em>
@@ -89,6 +91,16 @@
 </main>
 
 <style>
+	.purpleTeam {
+		color: black;
+		background: linear-gradient(to right, rgba(255,0,255), rgba(0,255,255));
+	}
+
+	.greenTeam {
+		color: black;
+		background: linear-gradient(to right, rgba(0,255,255), rgba(0,255,0));
+	}
+
 	main {
 		padding: 1em;
 		max-width: 240px;
