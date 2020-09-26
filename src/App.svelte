@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { homeTruths, quickFireLies } from "./data";
 
-	const usedHomeTruths = new Set<string>([]);
-	const unusedHomeTruths = new Set<string>(homeTruths.keys());
-	const usedQFLs = new Set<string>([]);
-	const unusedQFLs = new Set<string>(quickFireLies.keys());
+	const usedHomeTruthsA = new Set<string>([]);
+	const unusedHomeTruthsA = new Set<string>(homeTruths.keys());
+	const usedHomeTruthsB = new Set<string>([]);
+	const unusedHomeTruthsB = new Set<string>(homeTruths.keys());
+
+	const usedQFLsA = new Set<string>([]);
+	const unusedQFLsA = new Set<string>(quickFireLies.keys());
+	const usedQFLsB = new Set<string>([]);
+	const unusedQFLsB = new Set<string>(quickFireLies.keys());
 
 	let modalVisible: boolean = false;
 
@@ -12,36 +17,31 @@
 		return [...set.keys()][Math.floor(Math.random() * set.size)];
 	}
 
-	function promptHomeTruth(e: MouseEvent): void {
+	interface PromptArgs {
+		label: string,
+		team: "A"|"B",
+		source: Set<string>,
+		used: Set<string>,
+		unused: Set<string>,
+	}
+
+	function prompt(args: PromptArgs): void {
+		const { source, used, unused, label, team } = args;
+
 		modalVisible = true;
 
-		if(unusedHomeTruths.size === 0){
-			alert(`No more distinct statements left in Home Truths! Reshuffling.`);
-			unusedHomeTruths.clear();
-			homeTruths.forEach(x => unusedHomeTruths.add(x));
+		if(unused.size === 0){
+			alert(`No more distinct statements left in ${label} for team ${team}! Reshuffling.`);
+			unused.clear();
+			source.forEach(x => unused.add(x));
 		}
-		const item: string = getRandomSetElement(unusedHomeTruths);
-		usedHomeTruths.add(item);
-		unusedHomeTruths.delete(item);
+		const item: string = getRandomSetElement(unused);
+		used.add(item);
+		unused.delete(item);
 
 		modalText = item;
 	}
-
-	function promptQFL(e: MouseEvent): void {
-		modalVisible = true;
-
-		if(unusedQFLs.size === 0){
-			alert(`No more distinct statements left in Quick-fire Lies! Reshuffling.`);
-			usedQFLs.clear();
-			quickFireLies.forEach(x => unusedQFLs.add(x));
-		}
-		const item: string = getRandomSetElement(unusedQFLs);
-		usedQFLs.add(item);
-		unusedQFLs.delete(item);
-
-		modalText = item;
-	}
-
+	
 	function onWindowClick(e: MouseEvent): void {
 		if(e.target === modalEle){
 			modalVisible = false;
@@ -66,15 +66,15 @@
 
 	<p><strong>Home Truths</strong> is the opening round of the show.</p>
 	
-	<button class="purpleTeam" on:click={promptHomeTruth}>Prompt for <strong>Team A</strong></button>
-	<button class="greenTeam" on:click={promptHomeTruth}>Prompt for <strong>Team B</strong></button>
+	<button class="purpleTeam" on:click={(e) => prompt({ label: "Home Truths", source: homeTruths, used: usedHomeTruthsA, unused: unusedHomeTruthsA, team: "A" })}>Prompt for <strong>Team A</strong></button>
+	<button class="greenTeam" on:click={(e) => prompt({ label: "Home Truths", source: homeTruths, used: usedHomeTruthsB, unused: unusedHomeTruthsB, team: "B" })}>Prompt for <strong>Team B</strong></button>
 	
 	<h2>Quick-fire Lies</h2>
 	
 	<p><strong>Quick-fire Lies</strong> is the second questioning round.</p>
 
-	<button class="purpleTeam" on:click={promptQFL}>Prompt for <strong>Team A</strong></button>
-	<button class="greenTeam" on:click={promptQFL}>Prompt for <strong>Team B</strong></button>
+	<button class="purpleTeam" on:click={(e) => prompt({ label: "Quick-fire Lies", source: quickFireLies, used: usedQFLsA, unused: unusedQFLsA, team: "A" })}>Prompt for <strong>Team A</strong></button>
+	<button class="greenTeam" on:click={(e) => prompt({ label: "Quick-fire Lies", source: quickFireLies, used: usedQFLsB, unused: unusedQFLsB, team: "B" })}>Prompt for <strong>Team B</strong></button>
 
 	<footer>
 		<em><small>This website is not affiliated with <em>Would I Lie to You?</em>.</small></em>
