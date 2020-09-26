@@ -55,7 +55,7 @@
 
         <div>
             <label style="display: block;">
-                Statements (optional). <em>Separate each statement with <code style="background-color: lightgrey; padding-left: 0.25em; padding-right: 0.25em;">===</code></em>:
+                Statements (optional). <em>Write each statement on a separate line</em>:
                 <textarea
                     type=textarea
                     on:input={(e) => editStatementList(i, e.target.value)}
