@@ -3,8 +3,17 @@
     export let playersOnTeam: string[];
     export let teamName: "A"|"B";
 
+    function makePlaceholderPlayerName(i: number): string {
+        return `Player ${i + 1}${teamName}`;
+    }
+
+    function editPlayerName(i: number, value: string){
+        playersOnTeam[i] = value;
+        playersOnTeam = [...playersOnTeam];
+    }
+
     function addPlayer(){
-        playersOnTeam = [...playersOnTeam, `Player ${playersOnTeam.length + 1}${teamName}`];
+        playersOnTeam = [...playersOnTeam, makePlaceholderPlayerName(playersOnTeam.length)];
     }
 
     function removePlayer(i: number){
@@ -19,13 +28,17 @@
         <h4>Player {i + 1}</h4>
 
         <div>
-            <label for={`team-${teamName}-player-${i}-name`} style="display: block;">Name:</label>
-            <input id={`team-${teamName}-player-${i}-name`} type="text" name={`team-${teamName}-player-${i}-name`} value={player}>
+            <label>
+                Name:
+                <input type=text on:input={(e) => editPlayerName(i, e.target.value)} style="margin-right: 0.8em;" value={player} placeholder={makePlaceholderPlayerName(i)}>
+            </label>
         </div>
-  
+
         <div>
-            <input id={`team-${teamName}-captain-${i}`} type="radio" name={`team-${teamName}-captain`} value={player} checked={i === indexOfCaptain}>
-            <label for={`team-${teamName}-captain-${i}`} style="display: inline-block; margin-left: 0.8em;">Is team captain?</label>
+            <label>
+                <input type=radio bind:group={indexOfCaptain} value={i} style="margin-right: 0.8em;">
+                Is team captain?
+            </label>
         </div>
 
         {#if i > 0}
