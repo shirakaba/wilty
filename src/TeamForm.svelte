@@ -47,9 +47,11 @@
             <button on:click={(e) => removePlayer(i)}>Remove player</button>
         {/if}
 
-        <div style="height: 16px;"></div>
-        
-        <button on:click={addPlayer}>Add another player</button>
+        {#if i === playersOnTeam.length -1}
+            <div style="height: 16px;"></div>
+            
+            <button on:click={addPlayer}>Add another player</button>
+        {/if}
     {/each}
 </div>
 
