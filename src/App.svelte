@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { homeTruths, quickFireLies } from "./data";
+	import TeamForm from "./TeamForm.svelte";
 
 	interface Statements {
 		source: Set<string>,
@@ -8,9 +9,12 @@
 	}
 
 	let playerA: number = 0;
-	let playersOnTeamA: string[] = ["Victoria Cohen Mitchell", "David Mitchell", "Jack Whitehall"];
+	let playersOnTeamA: string[] = ["Player 1A"];
+	let teamACaptainIndex: number = 0;
+
 	let playerB: number = 0;
-	let playersOnTeamB: string[] = ["Olivia Coleman", "Lee Mack", "James Acaster"];
+	let playersOnTeamB: string[] = ["Player 1B"];
+	let teamBCaptainIndex: number = 0;
 
 	const homeTruthsCommon: Statements = {
 		source: homeTruths,
@@ -96,25 +100,29 @@
 	<details open>
 		<summary>Click to toggle visibility</summary>
 
-		<h3 class="purpleTeam">Team A</h3>
+		<section class="purpleTeam">
+			<h3>Team A</h3>
+	
+			<!-- TODO: make captain selectable via drop-down -->
+			<div class="teamFormContainer">
+				<TeamForm
+					playersOnTeam={playersOnTeamA}
+					indexOfCaptain={teamACaptainIndex}
+					teamName="A"
+				/>
+			</div>
+		</section>
 
-		<!-- TODO: make captain selectable via drop-down -->
+		<section class="greenTeam">
+			<h3>Team B</h3>
+	
+			<TeamForm
+				playersOnTeam={playersOnTeamB}
+				indexOfCaptain={teamBCaptainIndex}
+				teamName="B"
+			/>
+		</section>
 
-		{#each playersOnTeamA as player, i}
-			<h4>Player {i + 1}</h4>
-			<label for="name">Name:</label>
-			<input type="text" name="name" value={player}>
-		{/each}
-
-
-
-		<h3 class="greenTeam">Team B</h3>
-
-		{#each playersOnTeamB as player, i}
-			<h4>Player {i + 1}</h4>
-			<label for="name">Name:</label>
-			<input type="text" name="name" value={player}>
-		{/each}
 	</details>
 
 	<h2>Home Truths</h2>
@@ -176,10 +184,14 @@
 		background: linear-gradient(to right, rgba(0,255,255), rgba(0,255,0));
 	}
 
+	.teamFormContainer {
+		margin: 8px;
+	}
+
 	main {
 		padding: 1em;
-		max-width: 240px;
 		margin: 0 auto;
+		max-width: 960px;
 	}
 
 	h1 {
@@ -187,12 +199,6 @@
 		text-transform: uppercase;
 		font-size: 4em;
 		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
 	}
 
 
