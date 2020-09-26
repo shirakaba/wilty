@@ -25,7 +25,7 @@
 
 <div class="paper">
     {#each playersOnTeam as player, i}
-        <h4>Player {i + 1}</h4>
+        <h4>Player #{i + 1}</h4>
 
         <div>
             <label>
@@ -41,15 +41,18 @@
             </label>
         </div>
 
+        <div style="height: 8px;"></div>
+
         {#if i > 0}
             <button on:click={(e) => removePlayer(i)}>Remove player</button>
         {/if}
+
+        <div style="height: 16px;"></div>
+        
+        <button on:click={addPlayer}>Add another player</button>
     {/each}
 </div>
 
-<div style="height: 16px;"></div>
-
-<button on:click={addPlayer}>Add another player</button>
 
 <style>
     /** @see http://css3.wikidot.com/blog:lined-paper-with-css */

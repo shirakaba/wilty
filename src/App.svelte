@@ -98,13 +98,15 @@
 	<h2>Player registration</h2>
 
 	<details open>
+		<div style="height: 8px;"></div>
+		
 		<summary>Click to toggle visibility</summary>
 
-		<section class="purpleTeam">
-			<h3>Team A</h3>
+		<section class="teamFormContainer purpleTeam">
+			<h3 style="margin-top: 8px;">Team A</h3>
 	
 			<!-- TODO: make captain selectable via drop-down -->
-			<div class="teamFormContainer">
+			<div class="">
 				<TeamForm
 					playersOnTeam={playersOnTeamA}
 					indexOfCaptain={teamACaptainIndex}
@@ -113,14 +115,16 @@
 			</div>
 		</section>
 
-		<section class="greenTeam">
-			<h3>Team B</h3>
+		<section class="teamFormContainer greenTeam">
+			<h3 style="margin-top: 8px;">Team B</h3>
 	
-			<TeamForm
-				playersOnTeam={playersOnTeamB}
-				indexOfCaptain={teamBCaptainIndex}
-				teamName="B"
-			/>
+			<div class="">
+				<TeamForm
+					playersOnTeam={playersOnTeamB}
+					indexOfCaptain={teamBCaptainIndex}
+					teamName="B"
+				/>
+			</div>
 		</section>
 
 	</details>
@@ -185,7 +189,7 @@
 	}
 
 	.teamFormContainer {
-		margin: 8px;
+		padding: 8px;
 	}
 
 	main {
