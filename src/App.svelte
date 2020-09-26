@@ -1,29 +1,32 @@
 <script lang="ts">
 	import { homeTruths, quickFireLies } from "./data";
 
-	interface PlayerStatements {
+	interface Statements {
 		source: Set<string>,
 		used: Set<string>,
 		unused: Set<string>,
 	}
 
 	let playerA: number = 0;
-	let playersOnTeamA: number = 3;
-	const usedHomeTruthsCommon = new Set<string>();
-	const unusedHomeTruthsCommon = new Set<string>(homeTruths.keys());
-	const usedHomeTruthsA = new Map<number, PlayerStatements>();
-	const unusedHomeTruthsA = new Map<number, PlayerStatements>();
-	const usedHomeTruthsB = new Map<number, PlayerStatements>();
-	const unusedHomeTruthsB = new Map<number, PlayerStatements>();
-
+	let playersOnTeamA: string[] = ["Victoria Cohen Mitchell", "David Mitchell", "Jack Whitehall"];
 	let playerB: number = 0;
-	let playersOnTeamB: number = 3;
-	const usedQFLsCommon = new Set<string>();
-	const unusedQFLsCommon = new Set<string>(quickFireLies.keys());
-	const usedQFLsA = new Map<number, PlayerStatements>();
-	const unusedQFLsA = new Map<number, PlayerStatements>();
-	const usedQFLsB = new Map<number, PlayerStatements>();
-	const unusedQFLsB = new Map<number, PlayerStatements>();
+	let playersOnTeamB: string[] = ["Olivia Coleman", "Lee Mack", "James Acaster"];
+
+	const homeTruthsCommon: Statements = {
+		source: homeTruths,
+		used: new Set<string>(),
+		unused: new Set<string>(homeTruths.keys()),
+	};
+	const homeTruthsA = new Map<number, Statements>();
+	const homeTruthsB = new Map<number, Statements>();
+
+	const QFLsA = new Map<number, Statements>();
+	const QFLsB = new Map<number, Statements>();
+	const QFLsCommon: Statements = {
+		source: quickFireLies,
+		used: new Set<string>(),
+		unused: new Set<string>(quickFireLies.keys()),
+	};
 
 	let modalVisible: boolean = false;
 
@@ -35,14 +38,12 @@
 		label: string,
 		team: "A"|"B",
 		player: number,
-		source: Set<string>,
-		usedCommon: Set<string>,
-		unusedCommon: Set<string>,
-		teamStatements: Map<number, PlayerStatements>,
+		commonStatements: Statements,
+		teamStatements: Map<number, Statements>,
 	}
 
 	function prompt(args: PromptArgs): void {
-		const { label, team, player, source, usedCommon, unusedCommon, teamStatements } = args;
+		const { label, team, player, commonStatements, teamStatements } = args;
 
 		let item: string;
 		const playerStatements = teamStatements.get(player);
@@ -54,14 +55,15 @@
 			playerStatements!.unused.delete(item);
 		} else {
 			// Pick a common statement, which will always be false.
-			if(unusedCommon.size === 0){
+			const { used, unused, source } = commonStatements;
+			if(unused.size === 0){
 				console.warn(`No more distinct statements left in ${label}! Reshuffling.`);
-				unusedCommon.clear();
-				source.forEach(x => unusedCommon.add(x));
+				used.clear();
+				source.forEach(x => unused.add(x));
 			}
-			item = getRandomSetElement(unusedCommon);
-			usedCommon.add(item);
-			unusedCommon.delete(item);
+			item = getRandomSetElement(unused);
+			used.add(item);
+			unused.delete(item);
 			// TODO: persist the used common statements into LocalStorage to prevent two concurrent rounds from reusing statements.
 		}
 
@@ -89,19 +91,45 @@
 	
 	<p>Panellists are chosen at random. A panellist reads out a statement about themselves and the oposing teams have to decide whether it is true or a lie. The opposing team are allowed to interrogate the panellist reading the statement, and if its a lie, the panellist must think of responses on the spot to convince the other team that it is true.</p>
 
+	<h2>Player registration</h2>
+
+	<details open>
+		<summary>Click to toggle visibility</summary>
+
+		<h3 class="purpleTeam">Team A</h3>
+
+		<!-- TODO: make captain selectable via drop-down -->
+
+		{#each playersOnTeamA as player, i}
+			<h4>Player {i + 1}</h4>
+			<label for="name">Name:</label>
+			<input type="text" name="name" value={player}>
+		{/each}
+
+
+
+		<h3 class="greenTeam">Team B</h3>
+
+		{#each playersOnTeamB as player, i}
+			<h4>Player {i + 1}</h4>
+			<label for="name">Name:</label>
+			<input type="text" name="name" value={player}>
+		{/each}
+	</details>
+
 	<h2>Home Truths</h2>
 
 	<p><strong>Home Truths</strong> is the opening round of the show.</p>
 	
 	<button
 		class="purpleTeam"
-		on:click={(e) => prompt({ label: "Home Truths", source: homeTruths, usedCommon: usedHomeTruthsCommon, unusedCommon: unusedHomeTruthsCommon, usedTeam: usedHomeTruthsA, unusedTeam: unusedHomeTruthsA, player: playerA, team: "A" })}
+		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: homeTruthsA, player: playerA, team: "A" })}
 	>
 		Prompt for <strong>Team A</strong>
 	</button>
 	<button
 		class="greenTeam"
-		on:click={(e) => prompt({ label: "Home Truths", source: homeTruths, usedCommon: usedHomeTruthsCommon, unusedCommon: unusedHomeTruthsCommon, usedTeam: usedHomeTruthsB, unusedTeam: unusedHomeTruthsB, player: playerB, team: "B" })}
+		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: homeTruthsB, player: playerB, team: "B" })}
 	>
 		Prompt for <strong>Team B</strong>
 	</button>
@@ -112,13 +140,13 @@
 
 	<button
 		class="purpleTeam"
-		on:click={(e) => prompt({ label: "Quick-fire Lies", source: quickFireLies, usedCommon: usedQFLsCommon, unusedCommon: unusedQFLsCommon, usedTeam: usedQFLsA, unusedTeam: unusedQFLsA, player: playerA, team: "A" })}
+		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: QFLsA, player: playerA, team: "A" })}
 	>
 		Prompt for <strong>Team A</strong>
 	</button>
 	<button
 		class="greenTeam"
-		on:click={(e) => prompt({ label: "Quick-fire Lies", source: quickFireLies, usedCommon: usedQFLsCommon, unusedCommon: unusedQFLsCommon, usedTeam: usedQFLsB, unusedTeam: unusedQFLsB, player: playerB, team: "B" })}
+		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: QFLsB, player: playerB, team: "B" })}
 	>
 		Prompt for <strong>Team B</strong>
 	</button>
