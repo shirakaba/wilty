@@ -9,6 +9,10 @@
 	let round: number = 0;
 	let turn: number = 0;
 	let currentTeam: "A"|"B" = startingTeam;
+	let opposingTeam: "A"|"B";
+	$: {
+		opposingTeam = currentTeam === "A" ? "B" : "A";
+	}
 
 	let playerA: number = 0;
 	let playersOnTeamA: string[] = ["Player 1A"];
@@ -19,6 +23,7 @@
 	$:{
 		teamACurrentPlayerIndex = playerOrder === "numeric" ? 0 : getRandomInt(0, playersOnTeamA.length - 1);
 	}
+	let teamAAnswer: "truth"|"lie"|"pending" = "pending";
 
 	let playerB: number = 0;
 	let playersOnTeamB: string[] = ["Player 1B"];
@@ -29,6 +34,7 @@
 	$:{
 		teamBCurrentPlayerIndex = playerOrder === "numeric" ? 0 : getRandomInt(0, playersOnTeamB.length - 1);
 	}
+	let teamBAnswer: "truth"|"lie"|"pending" = "pending";
 
 	let currentPlayer: string;
 	$:{
@@ -181,24 +187,60 @@
 
 	<h2>Game dashboard</h2>
 
-	<table class="gameStatusTable">
-		<tr>
-			<td>Round</td>
-			<td>{round + 1} ({round % 2 === 0 ? "Home Truths" : "Quick-fire Lies"})</td>
-		</tr>
-		<tr>
-			<td>Turn</td>
-			<td>{turn + 1}</td>
-		</tr>
-		<tr>
-			<td>Team</td>
-			<td class={currentTeam === "A" ? "purpleTeam" : "greenTeam"}>{currentTeam}</td>
-		</tr>
-		<tr>
-			<td>Player</td>
-			<td class={currentTeam === "A" ? "purpleTeam" : "greenTeam"}>{currentPlayer}</td>
-		</tr>
-	</table>
+	<section>
+		<h3 style="margin-top: 8px;">Game status</h3>
+
+		<table class="gameStatusTable">
+			<tr>
+				<td>Round</td>
+				<td>{round + 1} ({round % 2 === 0 ? "Home Truths" : "Quick-fire Lies"})</td>
+			</tr>
+			<tr>
+				<td>Turn</td>
+				<td>{turn + 1}</td>
+			</tr>
+			<tr>
+				<td>Team</td>
+				<td class={currentTeam === "A" ? "purpleTeam" : "greenTeam"}>{currentTeam}</td>
+			</tr>
+			<tr>
+				<td>Player</td>
+				<td class={currentTeam === "A" ? "purpleTeam" : "greenTeam"}>{currentPlayer}</td>
+			</tr>
+		</table>
+	</section>
+
+	<!-- svelte-ignore a11y-label-has-associated-control -->
+	<section>
+		<h3 style="margin-top: 8px;">Team answer</h3>
+
+		<p>Does <strong class="purpleTeam">Team {currentTeam}</strong> think <strong class="greenTeam">Team {opposingTeam}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
+
+		<label style="display: block;">
+			{#if currentTeam === "A"}
+				<input type=radio bind:group={teamBAnswer} value={"pending"} style="margin-left: 0.25em;">
+			{:else}
+				<input type=radio bind:group={teamAAnswer} value={"pending"} style="margin-left: 0.25em;">
+			{/if}
+			Pending
+		</label>
+		<label style="display: block;">
+			{#if currentTeam === "A"}
+				<input type=radio bind:group={teamBAnswer} value={"truth"} style="margin-left: 0.25em;">
+			{:else}
+				<input type=radio bind:group={teamAAnswer} value={"truth"} style="margin-left: 0.25em;">
+			{/if}
+			Truth
+		</label>
+		<label style="display: block;">
+			{#if currentTeam === "A"}
+				<input type=radio bind:group={teamBAnswer} value={"lie"} style="margin-left: 0.25em;">			
+			{:else}
+				<input type=radio bind:group={teamAAnswer} value={"lie"} style="margin-left: 0.25em;">
+			{/if}
+			Lie
+		</label>
+	</section>
 
 
 	<!-- Home Truths: B2, A2 -->
