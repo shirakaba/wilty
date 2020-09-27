@@ -168,7 +168,7 @@
 		</section>
 	</details>
 
-	<h2>Game status</h2>
+	<h2>Game dashboard</h2>
 
 	<table class="gameStatusTable">
 		<tr>
@@ -189,39 +189,47 @@
 		</tr>
 	</table>
 
-	<h2>Home Truths</h2>
+	{#if round % 2 === 0}
+		<h2>Home Truths</h2>
 
-	<p><strong>Home Truths</strong> is the opening round of the show.</p>
-	
-	<button
-		class="purpleTeam"
-		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
-	>
-		Prompt for <strong>Team A</strong>
-	</button>
-	<button
-		class="greenTeam"
-		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
-	>
-		Prompt for <strong>Team B</strong>
-	</button>
-	
-	<h2>Quick-fire Lies</h2>
-	
-	<p><strong>Quick-fire Lies</strong> is the second questioning round.</p>
+		<p><strong>Home Truths</strong> is the opening round of the show.</p>
+		
+		{#if currentTeam === "A"}
+			<button
+				class="purpleTeam"
+				on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
+			>
+				Prompt for <strong>{currentPlayer}</strong> on <strong>Team A</strong>
+			</button>
+		{:else}
+			<button
+				class="greenTeam"
+				on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
+			>
+				Prompt for <strong>{currentPlayer}</strong> on <strong>Team B</strong>
+			</button>
+		{/if}
+	{:else}
+		<h2>Quick-fire Lies</h2>
+		
+		<p><strong>Quick-fire Lies</strong> is the second questioning round.</p>
 
-	<button
-		class="purpleTeam"
-		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
-	>
-		Prompt for <strong>Team A</strong>
-	</button>
-	<button
-		class="greenTeam"
-		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
-	>
-		Prompt for <strong>Team B</strong>
-	</button>
+		{#if currentTeam === "A"}
+			<button
+				class="purpleTeam"
+				on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
+			>
+				Prompt for <strong>{currentPlayer}</strong> on <strong>Team A</strong>
+			</button>
+		{:else}
+			<button
+				class="greenTeam"
+				on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
+			>
+				Prompt for <strong>{currentPlayer}</strong> on <strong>Team B</strong>
+			</button>
+		{/if}
+	{/if}	
 
 	<footer>
 		<em><small>This website is not affiliated with <em>Would I Lie to You?</em>.</small></em>
