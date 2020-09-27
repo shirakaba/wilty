@@ -9,12 +9,12 @@
 	let round: number = 0;
 	let turn: number = 0;
 	let currentTeam: "A"|"B" = startingTeam;
-	let currentPlayerIndex: number = 0;
 
 	let playerA: number = 0;
 	let playersOnTeamA: string[] = ["Player 1A"];
 	let teamStatementsA: Statements[];
 	let teamACaptainIndex: number = 0;
+	let teamAAnswererHistory: number[] = [];
 	let teamACurrentPlayerIndex: number;
 	$:{
 		teamACurrentPlayerIndex = playerOrder === "numeric" ? 0 : getRandomInt(0, playersOnTeamA.length - 1);
@@ -24,6 +24,7 @@
 	let playersOnTeamB: string[] = ["Player 1B"];
 	let teamStatementsB: Statements[];
 	let teamBCaptainIndex: number = 0;
+	let teamBAnswererHistory: number[] = [];
 	let teamBCurrentPlayerIndex: number = playerOrder === "numeric" ? 0 : 1;
 	$:{
 		teamBCurrentPlayerIndex = playerOrder === "numeric" ? 0 : getRandomInt(0, playersOnTeamB.length - 1);
@@ -90,6 +91,12 @@
 			used.add(item);
 			unused.delete(item);
 			// TODO: persist the used common statements into LocalStorage to prevent two concurrent rounds from reusing statements.
+		}
+
+		if(team === "A"){
+			teamAAnswererHistory = [...teamAAnswererHistory, playerIndex];
+		} else {
+			teamBAnswererHistory = [...teamBAnswererHistory, playerIndex];
 		}
 
 		modalVisible = true;
@@ -188,6 +195,17 @@
 			<td class={currentTeam === "A" ? "purpleTeam" : "greenTeam"}>{currentPlayer}</td>
 		</tr>
 	</table>
+
+
+	<!-- Home Truths: B2, A2 -->
+	<!-- QFLs: B1, B0,  -->
+
+	<!-- Teams swap on each turn. -->
+	<!-- Rounds are time-limited to 10-15 mins. -->
+	<!-- At least QFLs appears to allow players to take a turn more than once during a round. -->
+
+	<!-- Home Truths: B2, A0, B0 -->
+	<!-- QFLs: B1, A1, B2, A2, A1  -->
 
 	{#if round % 2 === 0}
 		<h2>Home Truths</h2>
