@@ -1,4 +1,6 @@
 <script lang="ts">
+    import type { Statements } from "./Statements";
+
     export let indexOfCaptain: number = 0;
     export let playersOnTeam: string[];
     export let teamName: "A"|"B";
@@ -6,12 +8,6 @@
 	export let teamStatements: Statements[];
     $:{
 		updateStatements(teamStatementsRaw);
-	}
-
-	interface Statements {
-		source: Set<string>,
-		used: Set<string>,
-		unused: Set<string>,
 	}
 	
 	function updateStatements(teamStatementsRaw: string[]): void {
@@ -38,7 +34,6 @@
             });
         });
 
-        console.log(`updateStatements to:`, newTeamStatements);
         teamStatements = newTeamStatements;
 	}
 

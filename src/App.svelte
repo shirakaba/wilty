@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { homeTruths, quickFireLies } from "./data";
 	import TeamForm from "./TeamForm.svelte";
-
-	interface Statements {
-		source: Set<string>,
-		used: Set<string>,
-		unused: Set<string>,
-	}
+	import type { Statements } from "./Statements";
 
 	let playerA: number = 0;
 	let playersOnTeamA: string[] = ["Player 1A"];
