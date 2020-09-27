@@ -125,6 +125,11 @@
 
 		<section class="teamFormContainer purpleTeam">
 			<h3 style="margin-top: 8px;">Team A</h3>
+
+			<label style="display: block;">
+				Is starting team?
+				<input type=radio bind:group={startingTeam} value={"A"} style="margin-left: 0.25em;">
+			</label>
 	
 			<TeamForm
 				playersOnTeam={playersOnTeamA}
@@ -136,6 +141,11 @@
 
 		<section class="teamFormContainer greenTeam">
 			<h3 style="margin-top: 8px;">Team B</h3>
+
+			<label style="display: block;">
+				Is starting team?
+				<input type=radio bind:group={startingTeam} value={"B"} style="margin-left: 0.25em;">
+			</label>
 
 			<TeamForm
 				playersOnTeam={playersOnTeamB}
@@ -160,10 +170,24 @@
 
 	<h2>Game status</h2>
 
-	<p><strong>Round:</strong> {round + 1}</p>
-	<p><strong>Turn:</strong> {turn + 1}</p>
-	<p><strong>Team:</strong> {currentTeam}</p>
-	<p><strong>Player:</strong> {currentPlayer}</p>
+	<table class="gameStatusTable">
+		<tr>
+			<td>Round</td>
+			<td>{round + 1} ({round % 2 === 0 ? "Home Truths" : "Quick-fire Lies"})</td>
+		</tr>
+		<tr>
+			<td>Turn</td>
+			<td>{turn + 1}</td>
+		</tr>
+		<tr>
+			<td>Team</td>
+			<td class={currentTeam === "A" ? "purpleTeam" : "greenTeam"}>{currentTeam}</td>
+		</tr>
+		<tr>
+			<td>Player</td>
+			<td class={currentTeam === "A" ? "purpleTeam" : "greenTeam"}>{currentPlayer}</td>
+		</tr>
+	</table>
 
 	<h2>Home Truths</h2>
 
@@ -226,6 +250,19 @@
 
 	.teamFormContainer {
 		padding: 8px;
+	}
+
+	.gameStatusTable {
+		border-spacing: 4px;
+	}
+
+	.gameStatusTable > tr > td:nth-child(1){
+		text-align: right;
+		font-weight: bold;
+	}
+
+	.gameStatusTable > tr > td:nth-child(2){
+		text-align: center;
 	}
 
 	main {
