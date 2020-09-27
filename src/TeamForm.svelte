@@ -39,7 +39,6 @@
 			newTeamStatements.push(obj);
         });
 
-        console.log(`newTeamStatements`, newTeamStatements);
         teamStatements = newTeamStatements;
 	}
 
