@@ -9,14 +9,19 @@
 	let round: number = 0;
 	let turn: number = 0;
 	let currentTeam: "A"|"B" = startingTeam;
-	let opposingTeam: "A"|"B";
+	let classForCurrentTeam: "purpleTeam"|"greenTeam";
+	let classForInterrogatingTeam: "purpleTeam"|"greenTeam";
+	let interrogatingTeam: "A"|"B";
 	$: {
-		opposingTeam = currentTeam === "A" ? "B" : "A";
+		interrogatingTeam = currentTeam === "A" ? "B" : "A";
+		classForCurrentTeam = currentTeam === "A" ? "purpleTeam" : "greenTeam";
+		classForInterrogatingTeam = currentTeam === "A" ? "greenTeam" : "purpleTeam";
 	}
 
 	let playerA: number = 0;
 	let playersOnTeamA: string[] = ["Player 1A"];
 	let teamStatementsA: Statements[];
+	let teamAPoints: number = 0;
 	let teamACaptainIndex: number = 0;
 	let teamAAnswererHistory: number[] = [];
 	let teamACurrentPlayerIndex: number;
@@ -24,10 +29,12 @@
 		teamACurrentPlayerIndex = playerOrder === "numeric" ? 0 : getRandomInt(0, playersOnTeamA.length - 1);
 	}
 	let teamAAnswer: "truth"|"lie"|"pending" = "pending";
+	let teamAReality: "truth"|"lie"|"pending" = "pending";
 
 	let playerB: number = 0;
 	let playersOnTeamB: string[] = ["Player 1B"];
 	let teamStatementsB: Statements[];
+	let teamBPoints: number = 0;
 	let teamBCaptainIndex: number = 0;
 	let teamBAnswererHistory: number[] = [];
 	let teamBCurrentPlayerIndex: number = playerOrder === "numeric" ? 0 : 1;
@@ -35,6 +42,7 @@
 		teamBCurrentPlayerIndex = playerOrder === "numeric" ? 0 : getRandomInt(0, playersOnTeamB.length - 1);
 	}
 	let teamBAnswer: "truth"|"lie"|"pending" = "pending";
+	let teamBReality: "truth"|"lie"|"pending" = "pending";
 
 	let currentPlayer: string;
 	$:{
@@ -119,6 +127,95 @@
 		modalVisible = false;
 	}
 
+	function onSpeakersAnswer(): void {
+		// currentTeam means the team that have spoken the statement.
+		if(currentTeam === "A"){
+			// Team B are interrogating Team A.
+			if(teamBAnswer === teamAReality){
+				awardPointToTeam(interrogatingTeam, "correct_answer");
+			} else {
+				awardPointToTeam(currentTeam, "successful_trick");
+			}
+		} else {
+			// Team A are interrogating Team B.
+			if(teamAAnswer === teamBReality){
+				awardPointToTeam(interrogatingTeam, "correct_answer");
+			} else {
+				awardPointToTeam(currentTeam, "successful_trick");
+			}
+		}
+
+		// TODO: give host a button to choose either "next turn" or "next round".
+		// nextTurn();
+	}
+
+	function awardPointToTeam(team: "A"|"B", dueTo: "correct_answer"|"successful_trick"): void {
+		if(team === "A"){
+			teamAPoints++;
+		} else {
+			teamBPoints++;
+		}
+
+		// TODO: play appropriate animation
+	}
+
+	function getRandomElementFromArray<T>(items: T[]): T {
+		return items[getRandomInt(0, items.length)];
+	}
+
+	function rotatePlayer(onTeam: "A"|"B"): void {
+		if(onTeam === "A"){
+			if(playerOrder === "numeric"){
+				teamACurrentPlayerIndex = (teamACurrentPlayerIndex + 1) % playersOnTeamA.length;
+			} else {
+				// Exclude previous answerers from becoming next player.
+				if(playersOnTeamA.length > 1 && teamAAnswererHistory.length > 0){
+					const playerIndices = playersOnTeamA.map((name, i) => i);
+					const playersExceptLastOne = playerIndices.filter((index) => index !== teamAAnswererHistory[teamAAnswererHistory.length - 1]);
+					teamACurrentPlayerIndex = getRandomElementFromArray(playersExceptLastOne);
+				}
+			}
+		} else {
+			if(playerOrder === "numeric"){
+				teamBCurrentPlayerIndex = (teamBCurrentPlayerIndex + 1) % playersOnTeamB.length;
+			} else {
+				// Exclude previous answerers from becoming next player.
+				if(playersOnTeamB.length > 1 && teamBAnswererHistory.length > 0){
+					const playerIndices = playersOnTeamB.map((name, i) => i);
+					const playersExceptLastOne = playerIndices.filter((index) => index !== teamBAnswererHistory[teamBAnswererHistory.length - 1]);
+					teamBCurrentPlayerIndex = getRandomElementFromArray(playersExceptLastOne);
+				}
+			}
+		}
+	}
+
+	function resetAnswers(): void {
+		teamAAnswer = "pending";
+		teamBAnswer = "pending";
+		teamAReality = "pending";
+		teamBReality = "pending";
+	}
+
+	function nextTurn(): void {
+		turn++;
+
+		resetAnswers();
+		
+		rotatePlayer(interrogatingTeam);
+		currentTeam = interrogatingTeam; // interrogatingTeam will switch reactively.
+	}
+
+	/**
+	 * At the end of each answer, the host should pick one of either "next turn" or "next round".
+	 * As nextRound() inherits all the same nextTurn() behaviour, this prevents rotating players twice.
+	 */
+	function nextRound(): void {
+		nextTurn();
+		turn = 0;
+
+		round++;
+	}
+
 	let modalEle: HTMLDivElement;
 	let modalText: string = "";
 </script>
@@ -201,20 +298,20 @@
 			</tr>
 			<tr>
 				<td>Team</td>
-				<td class={currentTeam === "A" ? "purpleTeam" : "greenTeam"}>{currentTeam}</td>
+				<td class={classForCurrentTeam}>{currentTeam}</td>
 			</tr>
 			<tr>
 				<td>Player</td>
-				<td class={currentTeam === "A" ? "purpleTeam" : "greenTeam"}>{currentPlayer}</td>
+				<td class={classForCurrentTeam}>{currentPlayer}</td>
 			</tr>
 		</table>
 	</section>
 
 	<!-- svelte-ignore a11y-label-has-associated-control -->
 	<section>
-		<h3 style="margin-top: 8px;">Team answer</h3>
+		<h3 style="margin-top: 8px;">Examiners' conclusion</h3>
 
-		<p>Does <strong class="purpleTeam">Team {currentTeam}</strong> think <strong class="greenTeam">Team {opposingTeam}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
+		<p>Does <strong class={classForInterrogatingTeam}>Team {interrogatingTeam}</strong> think <strong class={classForCurrentTeam}>Team {currentTeam}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
 
 		<label style="display: block;">
 			{#if currentTeam === "A"}
@@ -241,6 +338,28 @@
 			Lie
 		</label>
 	</section>
+
+	{#if (currentTeam === "A" && teamBAnswer !== "pending") || (currentTeam === "B" && teamAAnswer !== "pending")}
+		<section>
+			<h3 style="margin-top: 8px;">Speaker's answer</h3>
+
+			<p>Was <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement a <strong>truth</strong> or a <strong>lie</strong>?</p>
+
+			<button
+				class="truth"
+				on:click={(e) => {}}
+			>
+				Truth
+			</button>
+
+			<button
+				class="lie"
+				on:click={(e) => onSpeakersAnswer()}
+			>
+				Lie
+			</button>
+		</section>
+	{/if}
 
 
 	<!-- Home Truths: B2, A2 -->
@@ -335,6 +454,14 @@
 
 	.gameStatusTable > tr > td:nth-child(2){
 		text-align: center;
+	}
+
+	.truth {
+		background-color: rgb(0,255,0);
+	}
+
+	.lie {
+		background-color: rgb(255,0,255);
 	}
 
 	main {
