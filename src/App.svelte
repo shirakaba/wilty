@@ -145,6 +145,17 @@
 			/>
 		</section>
 
+		<section>
+			<h3 style="margin-top: 8px;">Player order</h3>
+			<label style="display: block;">
+				Numeric
+				<input type=radio bind:group={playerOrder} value={"numeric"} style="margin-left: 0.25em;">
+			</label>
+			<label style="display: block;">
+				Random
+				<input type=radio bind:group={playerOrder} value={"random"} style="margin-left: 0.25em;">
+			</label>
+		</section>
 	</details>
 
 	<h2>Game status</h2>
