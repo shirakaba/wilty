@@ -18,11 +18,6 @@
 		used: new Set<string>(),
 		unused: new Set<string>(homeTruths.keys()),
 	};
-	const homeTruthsA: Statements[] = [];
-	const homeTruthsB: Statements[] = [];
-
-	const QFLsA: Statements[] = [];
-	const QFLsB: Statements[] = [];
 	const QFLsCommon: Statements = {
 		source: quickFireLies,
 		used: new Set<string>(),
@@ -43,13 +38,15 @@
 		teamStatements: Statements[],
 	}
 
+	const preferPlayerStatements: boolean = true;
+
 	function prompt(args: PromptArgs): void {
 		const { label, team, playerIndex, commonStatements, teamStatements } = args;
 
 		let item: string;
 		const playerStatements = teamStatements[playerIndex];
 	
-		if(playerStatements?.unused.size && Math.random() < 0.5){
+		if(playerStatements?.unused.size && (preferPlayerStatements ? true : Math.random() < 0.5)){
 			// Pick a player statement. Player statements may be true or false. Player statements never get shuffled.
 			item = getRandomSetElement(playerStatements!.unused);
 			playerStatements!.used.add(item);
@@ -129,13 +126,13 @@
 	
 	<button
 		class="purpleTeam"
-		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: homeTruthsA, playerIndex: playerA, team: "A" })}
+		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
 	>
 		Prompt for <strong>Team A</strong>
 	</button>
 	<button
 		class="greenTeam"
-		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: homeTruthsB, playerIndex: playerB, team: "B" })}
+		on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
 	>
 		Prompt for <strong>Team B</strong>
 	</button>
@@ -146,13 +143,13 @@
 
 	<button
 		class="purpleTeam"
-		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: QFLsA, playerIndex: playerA, team: "A" })}
+		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
 	>
 		Prompt for <strong>Team A</strong>
 	</button>
 	<button
 		class="greenTeam"
-		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: QFLsB, playerIndex: playerB, team: "B" })}
+		on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
 	>
 		Prompt for <strong>Team B</strong>
 	</button>
