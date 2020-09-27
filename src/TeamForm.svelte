@@ -2,16 +2,10 @@
     export let indexOfCaptain: number = 0;
     export let playersOnTeam: string[];
     export let teamName: "A"|"B";
-    let teamStatementsRaw: string[] = [""];
-	export let teamStatements: Record<number, Statements> = {
-		0: {
-			source: new Set<string>(),
-			used: new Set<string>(),
-			unused: new Set<string>(),
-		}
-    };
+    let teamStatementsRaw: string[] = playersOnTeam.map(p => "");
+	export let teamStatements: Statements[];
     $:{
-		updateStatements(teamStatementsRaw, teamStatements);
+		updateStatements(teamStatementsRaw);
 	}
 
 	interface Statements {
@@ -20,14 +14,14 @@
 		unused: Set<string>,
 	}
 	
-	function updateStatements(teamStatementsRaw: string[], teamStatements: Record<number, Statements>): void {
-		console.log(`updateStatements(${JSON.stringify(teamStatementsRaw)}, ${teamStatements});`, teamStatements);
-		teamStatementsRaw.forEach((teamStatement: string, playerIndex: number) => {
+	function updateStatements(teamStatementsRaw: string[]): void {
+        const newTeamStatements = [];
+		teamStatementsRaw.forEach((teamStatement: string) => {
 			const splits: string[] = teamStatement.trim().split("\n");
-			const { unused, source } = teamStatements[playerIndex];
-
-			unused.clear();
-			source.clear();
+            
+            const source = new Set();
+            const unused = new Set();
+            const used = new Set();
 
 			splits.forEach((split: string) => {
 				const statement: string = split.trim();
@@ -37,10 +31,15 @@
 				}
 			});
 
-			teamStatements[playerIndex] = {
-				...teamStatements[playerIndex],
-			};
-		});
+			newTeamStatements.push({
+                source,
+                unused,
+                used,
+            });
+        });
+
+        console.log(`updateStatements to:`, newTeamStatements);
+        teamStatements = newTeamStatements;
 	}
 
 
@@ -61,11 +60,7 @@
     function addPlayer(): void {
         playersOnTeam = [...playersOnTeam, makePlaceholderPlayerName(playersOnTeam.length)];
         teamStatementsRaw = [...teamStatementsRaw, ""];
-        teamStatements[playersOnTeam.length] = {
-	        source: new Set<string>(),
-			used: new Set<string>(),
-			unused: new Set<string>(),
-        };
+        /* Syncing-up with teamStatements handled by the reactive statement. */
     }
 
     function removePlayer(i: number){
@@ -75,7 +70,8 @@
 
         teamStatementsRaw.splice(i, 1);
         teamStatementsRaw = [...teamStatementsRaw];
-        delete teamStatements[i];
+
+        /* Syncing-up with teamStatements handled by the reactive statement. */
     }
 </script>
 

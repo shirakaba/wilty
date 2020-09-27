@@ -10,18 +10,12 @@
 
 	let playerA: number = 0;
 	let playersOnTeamA: string[] = ["Player 1A"];
-	let teamStatementsA: Record<number, Statements>;
+	let teamStatementsA: Statements[];
 	let teamACaptainIndex: number = 0;
 
 	let playerB: number = 0;
 	let playersOnTeamB: string[] = ["Player 1B"];
-	let teamStatementsB: Record<number, Statements> = {
-		0: {
-			source: new Set<string>(),
-			used: new Set<string>(),
-			unused: new Set<string>(),
-		}
-	};
+	let teamStatementsB: Statements[];
 	let teamBCaptainIndex: number = 0;
 
 	const homeTruthsCommon: Statements = {
@@ -29,11 +23,11 @@
 		used: new Set<string>(),
 		unused: new Set<string>(homeTruths.keys()),
 	};
-	const homeTruthsA: Record<number, Statements> = {};
-	const homeTruthsB: Record<number, Statements> = {};
+	const homeTruthsA: Statements[] = [];
+	const homeTruthsB: Statements[] = [];
 
-	const QFLsA: Record<number, Statements> = {};
-	const QFLsB: Record<number, Statements> = {};
+	const QFLsA: Statements[] = [];
+	const QFLsB: Statements[] = [];
 	const QFLsCommon: Statements = {
 		source: quickFireLies,
 		used: new Set<string>(),
@@ -51,7 +45,7 @@
 		team: "A"|"B",
 		playerIndex: number,
 		commonStatements: Statements,
-		teamStatements: Record<number, Statements>,
+		teamStatements: Statements[],
 	}
 
 	function prompt(args: PromptArgs): void {
