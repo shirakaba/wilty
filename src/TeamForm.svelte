@@ -12,12 +12,16 @@
 	
 	function updateStatements(teamStatementsRaw: string[]): void {
         const newTeamStatements = [];
-		teamStatementsRaw.forEach((teamStatement: string) => {
+		teamStatementsRaw.forEach((teamStatement: string, playerIndex: number) => {
+            
 			const splits: string[] = teamStatement.trim().split("\n");
             
-            const source = new Set();
-            const unused = new Set();
-            const used = new Set();
+            const source = teamStatements?.[playerIndex]?.source ?? new Set();
+            source.clear();
+            const unused = teamStatements?.[playerIndex]?.unused ?? new Set();
+            unused.clear();
+            const used = teamStatements?.[playerIndex]?.used ?? new Set();
+            used.clear();
 
 			splits.forEach((split: string) => {
 				const statement: string = split.trim();
@@ -25,15 +29,17 @@
 					source.add(statement);
 					unused.add(statement);
 				}
-			});
-
-			newTeamStatements.push({
-                source,
-                unused,
-                used,
             });
+            
+            const obj: Partial<Statements> = teamStatements?.[playerIndex] ?? {};
+            obj.source = source;
+            obj.unused = unused;
+            obj.used = used;
+
+			newTeamStatements.push(obj);
         });
 
+        console.log(`newTeamStatements`, newTeamStatements);
         teamStatements = newTeamStatements;
 	}
 
