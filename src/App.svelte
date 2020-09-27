@@ -3,15 +3,36 @@
 	import TeamForm from "./TeamForm.svelte";
 	import type { Statements } from "./Statements";
 
+	let startingTeam: "A"|"B" = "A";
+	let playerOrder: "random"|"numeric" = "numeric";
+
+	let round: number = 0;
+	let turn: number = 0;
+	let currentTeam: "A"|"B" = startingTeam;
+	let currentPlayerIndex: number = 0;
+
 	let playerA: number = 0;
 	let playersOnTeamA: string[] = ["Player 1A"];
 	let teamStatementsA: Statements[];
 	let teamACaptainIndex: number = 0;
+	let teamACurrentPlayerIndex: number;
+	$:{
+		teamACurrentPlayerIndex = playerOrder === "numeric" ? 0 : getRandomInt(0, playersOnTeamA.length - 1);
+	}
 
 	let playerB: number = 0;
 	let playersOnTeamB: string[] = ["Player 1B"];
 	let teamStatementsB: Statements[];
 	let teamBCaptainIndex: number = 0;
+	let teamBCurrentPlayerIndex: number = playerOrder === "numeric" ? 0 : 1;
+	$:{
+		teamBCurrentPlayerIndex = playerOrder === "numeric" ? 0 : getRandomInt(0, playersOnTeamB.length - 1);
+	}
+
+	let currentPlayer: string;
+	$:{
+		currentPlayer = currentTeam === "A" ? playersOnTeamA[teamACurrentPlayerIndex] : playersOnTeamB[teamBCurrentPlayerIndex];
+	}
 
 	const homeTruthsCommon: Statements = {
 		source: homeTruths,
@@ -25,6 +46,12 @@
 	};
 
 	let modalVisible: boolean = false;
+
+	function getRandomInt(min: number, max: number): number {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
 
 	function getRandomSetElement<T>(set: Set<T>): T {
 		return [...set.keys()][Math.floor(Math.random() * set.size)];
@@ -91,7 +118,7 @@
 
 	<h2>Player registration</h2>
 
-	<details open>
+	<details>
 		<div style="height: 8px;"></div>
 
 		<summary>Click to toggle visibility</summary>
@@ -119,6 +146,13 @@
 		</section>
 
 	</details>
+
+	<h2>Game status</h2>
+
+	<p><strong>Round:</strong> {round + 1}</p>
+	<p><strong>Turn:</strong> {turn + 1}</p>
+	<p><strong>Team:</strong> {currentTeam}</p>
+	<p><strong>Player:</strong> {currentPlayer}</p>
 
 	<h2>Home Truths</h2>
 
