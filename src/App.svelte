@@ -105,8 +105,12 @@
 
 	function onWindowClick(e: MouseEvent): void {
 		if(e.target === modalEle){
-			modalVisible = false;
+			closeModal();
 		}
+	}
+
+	function closeModal(): void {
+		modalVisible = false;
 	}
 
 	let modalEle: HTMLDivElement;
@@ -257,7 +261,7 @@
 	<div bind:this={modalEle} class="modal" style={`display: ${modalVisible ? "block" : "none"};`}>
 		<!-- Modal content -->
 		<div class="modal-content">
-			<span on:click={(e) => modalVisible = false} class="close">&times;</span>
+			<span on:click={(e) => closeModal()} class="close">&times;</span>
 			<p>{modalText}</p>
 		</div>
 	</div>
