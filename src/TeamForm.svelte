@@ -1,8 +1,48 @@
 <script lang="ts">
     export let indexOfCaptain: number = 0;
     export let playersOnTeam: string[];
-    export let teamStatementsRaw: string[];
     export let teamName: "A"|"B";
+    let teamStatementsRaw: string[] = [""];
+	export let teamStatements: Record<number, Statements> = {
+		0: {
+			source: new Set<string>(),
+			used: new Set<string>(),
+			unused: new Set<string>(),
+		}
+    };
+    $:{
+		updateStatements(teamStatementsRaw, teamStatements);
+	}
+
+	interface Statements {
+		source: Set<string>,
+		used: Set<string>,
+		unused: Set<string>,
+	}
+	
+	function updateStatements(teamStatementsRaw: string[], teamStatements: Record<number, Statements>): void {
+		console.log(`updateStatements(${JSON.stringify(teamStatementsRaw)}, ${teamStatements});`, teamStatements);
+		teamStatementsRaw.forEach((teamStatement: string, playerIndex: number) => {
+			const splits: string[] = teamStatement.trim().split("\n");
+			const { unused, source } = teamStatements[playerIndex];
+
+			unused.clear();
+			source.clear();
+
+			splits.forEach((split: string) => {
+				const statement: string = split.trim();
+				if(statement){
+					source.add(statement);
+					unused.add(statement);
+				}
+			});
+
+			teamStatements[playerIndex] = {
+				...teamStatements[playerIndex],
+			};
+		});
+	}
+
 
     function makePlaceholderPlayerName(i: number): string {
         return `Player ${i + 1}${teamName}`;
@@ -21,6 +61,11 @@
     function addPlayer(): void {
         playersOnTeam = [...playersOnTeam, makePlaceholderPlayerName(playersOnTeam.length)];
         teamStatementsRaw = [...teamStatementsRaw, ""];
+        teamStatements[playersOnTeam.length] = {
+	        source: new Set<string>(),
+			used: new Set<string>(),
+			unused: new Set<string>(),
+        };
     }
 
     function removePlayer(i: number){
@@ -30,6 +75,7 @@
 
         teamStatementsRaw.splice(i, 1);
         teamStatementsRaw = [...teamStatementsRaw];
+        delete teamStatements[i];
     }
 </script>
 

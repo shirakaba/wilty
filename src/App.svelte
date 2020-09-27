@@ -7,43 +7,10 @@
 		used: Set<string>,
 		unused: Set<string>,
 	}
-	
-	function updateStatements(teamStatementsRaw: string[], teamStatements: Record<number, Statements>): void {
-		console.log(`updateStatements(${JSON.stringify(teamStatementsRaw)}, ${teamStatements});`, teamStatements);
-		teamStatementsRaw.forEach((teamStatement: string, playerIndex: number) => {
-			const splits: string[] = teamStatement.trim().split("\n");
-			const { unused, source } = teamStatements[playerIndex];
-
-			unused.clear();
-			source.clear();
-
-			splits.forEach((split: string) => {
-				const statement: string = split.trim();
-				if(statement){
-					source.add(statement);
-					unused.add(statement);
-				}
-			});
-
-			teamStatements[playerIndex] = {
-				...teamStatements[playerIndex],
-			};
-		});
-	}
 
 	let playerA: number = 0;
 	let playersOnTeamA: string[] = ["Player 1A"];
-	let teamStatementsA: Record<number, Statements> = {
-		0: {
-			source: new Set<string>(),
-			used: new Set<string>(),
-			unused: new Set<string>(),
-		}
-	};
-	let teamStatementsRawA: string[] = [""];
-	$:{
-		updateStatements(teamStatementsRawA, teamStatementsA);
-	}
+	let teamStatementsA: Record<number, Statements>;
 	let teamACaptainIndex: number = 0;
 
 	let playerB: number = 0;
@@ -55,10 +22,6 @@
 			unused: new Set<string>(),
 		}
 	};
-	let teamStatementsRawB: string[] = [""];
-	$:{
-		updateStatements(teamStatementsRawB, teamStatementsB);
-	}
 	let teamBCaptainIndex: number = 0;
 
 	const homeTruthsCommon: Statements = {
@@ -152,7 +115,7 @@
 	
 			<TeamForm
 				playersOnTeam={playersOnTeamA}
-				bind:teamStatementsRaw={teamStatementsRawA}
+				bind:teamStatements={teamStatementsA}
 				indexOfCaptain={teamACaptainIndex}
 				teamName="A"
 			/>
@@ -163,7 +126,7 @@
 
 			<TeamForm
 				playersOnTeam={playersOnTeamB}
-				bind:teamStatementsRaw={teamStatementsRawB}
+				bind:teamStatements={teamStatementsB}
 				indexOfCaptain={teamBCaptainIndex}
 				teamName="B"
 			/>
