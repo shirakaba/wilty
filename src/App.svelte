@@ -7,11 +7,16 @@
 	let playerOrder: "random"|"numeric" = "numeric";
 
 	let round: number = 0;
+	let roundName: "Home Truths"|"Quick-fire Lies";
+	$: {
+		roundName = round % 2 === 0 ? "Home Truths" : "Quick-fire Lies";
+	}
 	let turn: number = 0;
 	let currentTeam: "A"|"B" = startingTeam;
 	let classForCurrentTeam: "purpleTeam"|"greenTeam";
 	let classForInterrogatingTeam: "purpleTeam"|"greenTeam";
 	let interrogatingTeam: "A"|"B";
+	let promptCommitted: boolean = false;
 	let turnFinished: boolean = false;
 	$: {
 		interrogatingTeam = currentTeam === "A" ? "B" : "A";
@@ -81,6 +86,10 @@
 
 	const preferPlayerStatements: boolean = true;
 
+	function promptForCurrentTurn(): void {
+		prompt({ label: roundName, commonStatements: roundName === "Home Truths" ? homeTruthsCommon : QFLsCommon, teamStatements: currentTeam === "A" ? teamStatementsA : teamStatementsB, playerIndex: currentTeam === "A" ? playerA : playerB, team: currentTeam });
+	}
+
 	function prompt(args: PromptArgs): void {
 		const { label, team, playerIndex, commonStatements, teamStatements } = args;
 
@@ -123,6 +132,7 @@
 	}
 
 	function closeModal(): void {
+		promptCommitted = true;
 		modalVisible = false;
 	}
 
@@ -201,6 +211,7 @@
 		
 		rotatePlayer(interrogatingTeam);
 		turnFinished = false;
+		promptCommitted = false;
 		currentTeam = interrogatingTeam; // interrogatingTeam will switch reactively.
 	}
 
@@ -337,138 +348,123 @@
 	<!-- Home Truths: B2, A0, B0 -->
 	<!-- QFLs: B1, A1, B2, A2, A1  -->
 
-	<section>
+	<section style={`opacity: ${promptCommitted ? 0.75 : 1}`}>
 		<h2>Start-of-round</h2>
 		
-		{#if round % 2 === 0}
-			<h3>Home Truths</h3>
-	
+		<h3>{roundName}</h3>
+
+		{#if roundName === "Home Truths"}
 			<p><strong>Home Truths</strong> is the opening round of the show.</p>
-			
-			{#if currentTeam === "A"}
-				<button
-					class="purpleTeam"
-					on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
-				>
-					Prompt for <strong>{currentPlayer}</strong> on <strong>Team A</strong>
-				</button>
-			{:else}
-				<button
-					class="greenTeam"
-					on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
-				>
-					Prompt for <strong>{currentPlayer}</strong> on <strong>Team B</strong>
-				</button>
-			{/if}
 		{:else}
-			<h2>Quick-fire Lies</h2>
-			
 			<p><strong>Quick-fire Lies</strong> is the second questioning round.</p>
-	
-			{#if currentTeam === "A"}
-				<button
-					class="purpleTeam"
-					on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
-				>
-					Prompt for <strong>{currentPlayer}</strong> on <strong>Team A</strong>
-				</button>
-			{:else}
-				<button
-					class="greenTeam"
-					on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
-				>
-					Prompt for <strong>{currentPlayer}</strong> on <strong>Team B</strong>
-				</button>
-			{/if}
 		{/if}
+
+		<button
+			class={classForCurrentTeam}
+			on:click={(e) => {
+				if(promptCommitted){
+					modalVisible = true;
+				} else {
+					promptForCurrentTurn();
+				}
+			}}
+		>
+			{#if promptCommitted}
+				Show prompt for <strong>{currentPlayer}</strong> on <strong>Team {currentTeam}</strong> again
+			{:else}
+				Prompt for <strong>{currentPlayer}</strong> on <strong>Team {currentTeam}</strong>
+			{/if}
+		</button>
 	</section>
 
-	
-	<section>
-		<h2>End-of-round</h2>
-
+	{#if promptCommitted}
 		<section>
-			<h3 style="margin-top: 8px;">Examiners' conclusion</h3>
-	
-			<p>Does <strong class={classForInterrogatingTeam}>Team {interrogatingTeam}</strong> think <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
-	
-			<!-- svelte-ignore a11y-label-has-associated-control -->
-			<label style="display: block;">
-				{#if currentTeam === "A"}
-					<input type=radio bind:group={teamBAnswer} value={"pending"} style="margin-left: 0.25em;">
-				{:else}
-					<input type=radio bind:group={teamAAnswer} value={"pending"} style="margin-left: 0.25em;">
-				{/if}
-				Pending
-			</label>
-			<!-- svelte-ignore a11y-label-has-associated-control -->
-			<label style="display: block;">
-				{#if currentTeam === "A"}
-					<input type=radio bind:group={teamBAnswer} value={"truth"} style="margin-left: 0.25em;">
-				{:else}
-					<input type=radio bind:group={teamAAnswer} value={"truth"} style="margin-left: 0.25em;">
-				{/if}
-				Truth
-			</label>
-			<!-- svelte-ignore a11y-label-has-associated-control -->
-			<label style="display: block;">
-				{#if currentTeam === "A"}
-					<input type=radio bind:group={teamBAnswer} value={"lie"} style="margin-left: 0.25em;">			
-				{:else}
-					<input type=radio bind:group={teamAAnswer} value={"lie"} style="margin-left: 0.25em;">
-				{/if}
-				Lie
-			</label>
+			<h2>End-of-round</h2>
+
+			<section>
+				<h3 style="margin-top: 8px;">Examiners' conclusion</h3>
+		
+				<p>Does <strong class={classForInterrogatingTeam}>Team {interrogatingTeam}</strong> think <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
+		
+				<!-- svelte-ignore a11y-label-has-associated-control -->
+				<label style="display: block;">
+					{#if currentTeam === "A"}
+						<input type=radio bind:group={teamBAnswer} value={"pending"} style="margin-left: 0.25em;">
+					{:else}
+						<input type=radio bind:group={teamAAnswer} value={"pending"} style="margin-left: 0.25em;">
+					{/if}
+					Pending
+				</label>
+				<!-- svelte-ignore a11y-label-has-associated-control -->
+				<label style="display: block;">
+					{#if currentTeam === "A"}
+						<input type=radio bind:group={teamBAnswer} value={"truth"} style="margin-left: 0.25em;">
+					{:else}
+						<input type=radio bind:group={teamAAnswer} value={"truth"} style="margin-left: 0.25em;">
+					{/if}
+					Truth
+				</label>
+				<!-- svelte-ignore a11y-label-has-associated-control -->
+				<label style="display: block;">
+					{#if currentTeam === "A"}
+						<input type=radio bind:group={teamBAnswer} value={"lie"} style="margin-left: 0.25em;">			
+					{:else}
+						<input type=radio bind:group={teamAAnswer} value={"lie"} style="margin-left: 0.25em;">
+					{/if}
+					Lie
+				</label>
+			</section>
+
+			{#if (currentTeam === "A" && teamBAnswer !== "pending") || (currentTeam === "B" && teamAAnswer !== "pending")}
+				<section>
+					<h3 style="margin-top: 8px;">Speaker's answer</h3>
+		
+					<p>Was <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement a <strong>truth</strong> or a <strong>lie</strong>?</p>
+		
+					<button
+						class="truth"
+						on:click={(e) => onSpeakersAnswer("truth")}
+					>
+						Truth
+					</button>
+		
+					<button
+						class="lie"
+						on:click={(e) => onSpeakersAnswer("lie")}
+					>
+						Lie
+					</button>
+				</section>
+			{/if}
+
+			{#if turnFinished}
+				<section>
+					<h3>Continue</h3>
+		
+					{#if round % 2 === 0}
+						<p>There are normally 2-3 turns of Home Truths before the Quick-fire Lies round.</p>
+					{:else}
+						<p>There are normally 3-4 turns of Quick-fire lies before the Home Truths round.</p>
+					{/if}
+		
+					<p>This will of course depend on the time taken by the answerers; normally about ten minutes is allocated to the round.</p>
+		
+					<button
+						on:click={(e) => nextTurn()}
+					>
+						Next Turn
+					</button>
+		
+					<button
+						on:click={(e) => nextRound()}
+					>
+						Next Round
+					</button>
+				</section>
+			{/if}
 		</section>
 
-		{#if (currentTeam === "A" && teamBAnswer !== "pending") || (currentTeam === "B" && teamAAnswer !== "pending")}
-			<section>
-				<h3 style="margin-top: 8px;">Speaker's answer</h3>
-	
-				<p>Was <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement a <strong>truth</strong> or a <strong>lie</strong>?</p>
-	
-				<button
-					class="truth"
-					on:click={(e) => onSpeakersAnswer("truth")}
-				>
-					Truth
-				</button>
-	
-				<button
-					class="lie"
-					on:click={(e) => onSpeakersAnswer("lie")}
-				>
-					Lie
-				</button>
-			</section>
-		{/if}
-
-		{#if turnFinished}
-			<section>
-				<h3>Continue</h3>
-	
-				{#if round % 2 === 0}
-					<p>There are normally 2-3 turns of Home Truths before the Quick-fire Lies round.</p>
-				{:else}
-					<p>There are normally 3-4 turns of Quick-fire lies before the Home Truths round.</p>
-				{/if}
-	
-				<p>This will of course depend on the time taken by the answerers; normally about ten minutes is allocated to the round.</p>
-	
-				<button
-					on:click={(e) => nextTurn()}
-				>
-					Next Turn
-				</button>
-	
-				<button
-					on:click={(e) => nextRound()}
-				>
-					Next Round
-				</button>
-			</section>
-		{/if}
-	</section>
+	{/if}
 
 	<footer>
 		<em><small>This website is not affiliated with <em>Would I Lie to You?</em>.</small></em>
@@ -480,6 +476,9 @@
 		<div class="modal-content">
 			<span on:click={(e) => closeModal()} class="close">&times;</span>
 			<p>{modalText}</p>
+			{#if !promptCommitted}
+				<button on:click={() => promptForCurrentTurn()}>Re-prompt</button>
+			{/if}
 		</div>
 	</div>
 </main>
