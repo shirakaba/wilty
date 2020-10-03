@@ -52,6 +52,16 @@
 	$:{
 		currentPlayer = currentTeam === "A" ? playersOnTeamA[teamACurrentPlayerIndex] : playersOnTeamB[teamBCurrentPlayerIndex];
 	}
+	let currentTeamAnswer: "truth"|"lie"|"pending";
+	$: {
+		currentTeam === "A" ? teamAAnswer : teamBAnswer;
+	}
+	let awaitingSpeakerAnswer: boolean;
+	$: {
+		awaitingSpeakerAnswer = (currentTeam === "A" && teamBAnswer !== "pending") || (currentTeam === "B" && teamAAnswer !== "pending")
+	}
+	let lastAwardedTeam: "A"|"B"|"pending" = "pending";
+	let lastAwardedReason: "correct_answer"|"successful_trick"|"pending" = "pending";
 
 	const homeTruthsCommon: Statements = {
 		source: homeTruths,
@@ -154,19 +164,19 @@
 			}
 		}
 
-		// TODO: give host a button to choose either "next turn" or "next round".
-		// nextTurn();
 		turnFinished = true;
 	}
 
-	function awardPointToTeam(team: "A"|"B", dueTo: "correct_answer"|"successful_trick"): void {
+	function awardPointToTeam(team: "A"|"B", reason: "correct_answer"|"successful_trick"): void {
+		lastAwardedTeam = team;
+		lastAwardedReason = reason;
+
 		if(team === "A"){
+			// awardMessage = `Well done Team `
 			teamAPoints++;
 		} else {
 			teamBPoints++;
 		}
-
-		// TODO: play appropriate animation
 	}
 
 	function getRandomElementFromArray<T>(items: T[]): T {
@@ -378,10 +388,10 @@
 	</section>
 
 	{#if promptCommitted}
-		<section>
+		<section style={`opacity: ${turnFinished ? 0.75 : 1}`}>
 			<h2>End-of-round</h2>
 
-			<section>
+			<section style={`opacity: ${!turnFinished && awaitingSpeakerAnswer ? 0.75 : 1}`}>
 				<h3 style="margin-top: 8px;">Examiners' conclusion</h3>
 		
 				<p>Does <strong class={classForInterrogatingTeam}>Team {interrogatingTeam}</strong> think <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
@@ -415,55 +425,58 @@
 				</label>
 			</section>
 
-			{#if (currentTeam === "A" && teamBAnswer !== "pending") || (currentTeam === "B" && teamAAnswer !== "pending")}
+			{#if awaitingSpeakerAnswer}
 				<section>
 					<h3 style="margin-top: 8px;">Speaker's answer</h3>
 		
 					<p>Was <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement a <strong>truth</strong> or a <strong>lie</strong>?</p>
 		
-					<button
-						class="truth"
-						on:click={(e) => onSpeakersAnswer("truth")}
-					>
-						Truth
-					</button>
-		
-					<button
-						class="lie"
-						on:click={(e) => onSpeakersAnswer("lie")}
-					>
-						Lie
-					</button>
-				</section>
-			{/if}
-
-			{#if turnFinished}
-				<section>
-					<h3>Continue</h3>
-		
-					{#if round % 2 === 0}
-						<p>There are normally 2-3 turns of Home Truths before the Quick-fire Lies round.</p>
-					{:else}
-						<p>There are normally 3-4 turns of Quick-fire lies before the Home Truths round.</p>
+					{#if !turnFinished}
+						<button
+							class="truth"
+							on:click={(e) => onSpeakersAnswer("truth")}
+						>
+							Truth
+						</button>
+			
+						<button
+							class="lie"
+							on:click={(e) => onSpeakersAnswer("lie")}
+						>
+							Lie
+						</button>
 					{/if}
-		
-					<p>This will of course depend on the time taken by the answerers; normally about ten minutes is allocated to the round.</p>
-		
-					<button
-						on:click={(e) => nextTurn()}
-					>
-						Next Turn
-					</button>
-		
-					<button
-						on:click={(e) => nextRound()}
-					>
-						Next Round
-					</button>
 				</section>
 			{/if}
 		</section>
+	{/if}
 
+	{#if turnFinished}
+		<section>
+			<h2>Continue</h2>
+
+			<p>Well done <span>Team {lastAwardedTeam}</span> for <span>{lastAwardedReason === "correct_answer" ? `correctly answering that the statement was a` : `tricking the opposing team into thinking the statement was a`}{currentTeamAnswer}!</span></p>
+
+			{#if round % 2 === 0}
+				<p>There are normally 2-3 turns of Home Truths before the Quick-fire Lies round.</p>
+			{:else}
+				<p>There are normally 3-4 turns of Quick-fire lies before the Home Truths round.</p>
+			{/if}
+
+			<p>This will of course depend on the time taken by the answerers; normally about ten minutes is allocated to the round.</p>
+
+			<button
+				on:click={(e) => nextTurn()}
+			>
+				Next Turn
+			</button>
+
+			<button
+				on:click={(e) => nextRound()}
+			>
+				Next Round
+			</button>
+		</section>
 	{/if}
 
 	<footer>
