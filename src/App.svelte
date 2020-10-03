@@ -227,7 +227,7 @@
 
 	<p>Although originally distinguished by a difference in pace of questioning, these two rounds are now effectively played in the same way.</p>
 	
-	<p>Panellists are chosen at random. A panellist reads out a statement about themselves and the oposing teams have to decide whether it is true or a lie. The opposing team are allowed to interrogate the panellist reading the statement, and if its a lie, the panellist must think of responses on the spot to convince the other team that it is true.</p>
+	<p>Panellists are chosen at random. A panellist reads out a statement about themselves and the oposing teams have to decide whether it is true or a lie. The opposing team are allowed to interrogate the panellist reading the statement, and if it's a lie, the panellist must think of responses on the spot to convince the other team that it is true.</p>
 
 	<h2>Player registration</h2>
 
@@ -287,20 +287,33 @@
 
 		<table class="gameStatusTable">
 			<tr>
-				<td>Round</td>
+				<th colspan="2">Round</th>
 				<td>{round + 1} ({round % 2 === 0 ? "Home Truths" : "Quick-fire Lies"})</td>
 			</tr>
 			<tr>
-				<td>Turn</td>
+				<th colspan="2">Turn</th>
 				<td>{turn + 1}</td>
 			</tr>
 			<tr>
-				<td>Team</td>
+				<th colspan="2">Team</th>
 				<td class={classForCurrentTeam}>{currentTeam}</td>
 			</tr>
 			<tr>
-				<td>Player</td>
+				<th colspan="2">Player</th>
 				<td class={classForCurrentTeam}>{currentPlayer}</td>
+			</tr>
+			<tr>
+				<th rowspan="2">Scores</th>
+				<th class="purpleTeam">Team A</th>
+				<td>
+					<span>{teamAPoints}</span>
+				</td>
+			</tr>
+			<tr>
+				<th class="greenTeam">Team B</th>
+				<td>
+					<span>{teamBPoints}</span>
+				</td>
 			</tr>
 		</table>
 	</section>
@@ -481,13 +494,22 @@
 		border-spacing: 4px;
 	}
 
-	.gameStatusTable > tr > td:nth-child(1){
+	.gameStatusTable > tr > th {
+		border-bottom: 1px solid gray;
 		text-align: right;
-		font-weight: bold;
 	}
 
-	.gameStatusTable > tr > td:nth-child(2){
+	.gameStatusTable > tr > td {
 		text-align: center;
+	}
+
+	.gameStatusTable > tr:first-child > td,
+	.gameStatusTable > tr:first-child > th {
+		border-top: 1px solid gray;
+	}
+
+	.gameStatusTable > tr > td {
+		border-bottom: 1px solid gray;
 	}
 
 	.truth {
