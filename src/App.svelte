@@ -17,7 +17,23 @@
 	let classForInterrogatingTeam: "purpleTeam"|"greenTeam";
 	let interrogatingTeam: "A"|"B";
 	let promptCommitted: boolean = false;
+	$: {
+		if(promptCommitted){
+			// Lazy way of scrolling "Examiners' conclusion" into view.
+			requestAnimationFrame(() => {
+				window.scrollTo(0, document.body.scrollHeight);
+			});
+		}
+	}
 	let turnFinished: boolean = false;
+	$:{
+		if(turnFinished){
+			// Lazy way of scrolling "Continue" into view.
+			requestAnimationFrame(() => {
+				window.scrollTo(0, document.body.scrollHeight);
+			});
+		}
+	}
 	$: {
 		interrogatingTeam = promptedTeam === "A" ? "B" : "A";
 		classForPromptedTeam = promptedTeam === "A" ? "purpleTeam" : "greenTeam";
@@ -58,7 +74,13 @@
 	}
 	let awaitingSpeakerAnswer: boolean;
 	$: {
-		awaitingSpeakerAnswer = (promptedTeam === "A" && teamBAnswer !== "pending") || (promptedTeam === "B" && teamAAnswer !== "pending")
+		awaitingSpeakerAnswer = (promptedTeam === "A" && teamBAnswer !== "pending") || (promptedTeam === "B" && teamAAnswer !== "pending");
+		if(awaitingSpeakerAnswer){
+			// Lazy way of scrolling "Prompted player's answer" into view.
+			requestAnimationFrame(() => {
+				window.scrollTo(0, document.body.scrollHeight);
+			});
+		}
 	}
 	let lastAwardedTeam: "A"|"B"|"pending" = "pending";
 	let lastAwardedReason: "correct_answer"|"successful_trick"|"pending" = "pending";
