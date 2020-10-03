@@ -12,16 +12,16 @@
 		roundName = round % 2 === 0 ? "Home Truths" : "Quick-fire Lies";
 	}
 	let turn: number = 0;
-	let currentTeam: "A"|"B" = startingTeam;
-	let classForCurrentTeam: "purpleTeam"|"greenTeam";
+	let promptedTeam: "A"|"B" = startingTeam;
+	let classForPromptedTeam: "purpleTeam"|"greenTeam";
 	let classForInterrogatingTeam: "purpleTeam"|"greenTeam";
 	let interrogatingTeam: "A"|"B";
 	let promptCommitted: boolean = false;
 	let turnFinished: boolean = false;
 	$: {
-		interrogatingTeam = currentTeam === "A" ? "B" : "A";
-		classForCurrentTeam = currentTeam === "A" ? "purpleTeam" : "greenTeam";
-		classForInterrogatingTeam = currentTeam === "A" ? "greenTeam" : "purpleTeam";
+		interrogatingTeam = promptedTeam === "A" ? "B" : "A";
+		classForPromptedTeam = promptedTeam === "A" ? "purpleTeam" : "greenTeam";
+		classForInterrogatingTeam = promptedTeam === "A" ? "greenTeam" : "purpleTeam";
 	}
 
 	let playerA: number = 0;
@@ -50,15 +50,15 @@
 
 	let currentPlayer: string;
 	$:{
-		currentPlayer = currentTeam === "A" ? playersOnTeamA[teamACurrentPlayerIndex] : playersOnTeamB[teamBCurrentPlayerIndex];
+		currentPlayer = promptedTeam === "A" ? playersOnTeamA[teamACurrentPlayerIndex] : playersOnTeamB[teamBCurrentPlayerIndex];
 	}
-	let currentTeamAnswer: "truth"|"lie"|"pending";
+	let promptedTeamAnswer: "truth"|"lie"|"pending";
 	$: {
-		currentTeam === "A" ? teamAAnswer : teamBAnswer;
+		promptedTeam === "A" ? teamAAnswer : teamBAnswer;
 	}
 	let awaitingSpeakerAnswer: boolean;
 	$: {
-		awaitingSpeakerAnswer = (currentTeam === "A" && teamBAnswer !== "pending") || (currentTeam === "B" && teamAAnswer !== "pending")
+		awaitingSpeakerAnswer = (promptedTeam === "A" && teamBAnswer !== "pending") || (promptedTeam === "B" && teamAAnswer !== "pending")
 	}
 	let lastAwardedTeam: "A"|"B"|"pending" = "pending";
 	let lastAwardedReason: "correct_answer"|"successful_trick"|"pending" = "pending";
@@ -97,7 +97,7 @@
 	const preferPlayerStatements: boolean = true;
 
 	function promptForCurrentTurn(): void {
-		prompt({ label: roundName, commonStatements: roundName === "Home Truths" ? homeTruthsCommon : QFLsCommon, teamStatements: currentTeam === "A" ? teamStatementsA : teamStatementsB, playerIndex: currentTeam === "A" ? playerA : playerB, team: currentTeam });
+		prompt({ label: roundName, commonStatements: roundName === "Home Truths" ? homeTruthsCommon : QFLsCommon, teamStatements: promptedTeam === "A" ? teamStatementsA : teamStatementsB, playerIndex: promptedTeam === "A" ? playerA : playerB, team: promptedTeam });
 	}
 
 	function prompt(args: PromptArgs): void {
@@ -147,20 +147,20 @@
 	}
 
 	function onSpeakersAnswer(reality: "truth"|"lie"): void {
-		// currentTeam means the team that have spoken the statement.
-		if(currentTeam === "A"){
+		// promptedTeam means the team that have spoken the statement.
+		if(promptedTeam === "A"){
 			// Team B are interrogating Team A.
 			if(teamBAnswer === reality){
 				awardPointToTeam(interrogatingTeam, "correct_answer");
 			} else {
-				awardPointToTeam(currentTeam, "successful_trick");
+				awardPointToTeam(promptedTeam, "successful_trick");
 			}
 		} else {
 			// Team A are interrogating Team B.
 			if(teamAAnswer === reality){
 				awardPointToTeam(interrogatingTeam, "correct_answer");
 			} else {
-				awardPointToTeam(currentTeam, "successful_trick");
+				awardPointToTeam(promptedTeam, "successful_trick");
 			}
 		}
 
@@ -222,7 +222,7 @@
 		rotatePlayer(interrogatingTeam);
 		turnFinished = false;
 		promptCommitted = false;
-		currentTeam = interrogatingTeam; // interrogatingTeam will switch reactively.
+		promptedTeam = interrogatingTeam; // interrogatingTeam will switch reactively.
 	}
 
 	/**
@@ -325,12 +325,12 @@
 				<td>{turn + 1}</td>
 			</tr>
 			<tr>
-				<th colspan="2">Team</th>
-				<td class={classForCurrentTeam}>{currentTeam}</td>
+				<th colspan="2">Prompted Team</th>
+				<td class={classForPromptedTeam}>{promptedTeam}</td>
 			</tr>
 			<tr>
-				<th colspan="2">Player</th>
-				<td class={classForCurrentTeam}>{currentPlayer}</td>
+				<th colspan="2">Prompted Player</th>
+				<td class={classForPromptedTeam}>{currentPlayer}</td>
 			</tr>
 			<tr>
 				<th rowspan="2">Scores</th>
@@ -370,7 +370,7 @@
 		{/if}
 
 		<button
-			class={classForCurrentTeam}
+			class={classForPromptedTeam}
 			on:click={(e) => {
 				if(promptCommitted){
 					modalVisible = true;
@@ -380,9 +380,9 @@
 			}}
 		>
 			{#if promptCommitted}
-				Show prompt for <strong>{currentPlayer}</strong> on <strong>Team {currentTeam}</strong> again
+				Show prompt for <strong>{currentPlayer}</strong> on <strong>Team {promptedTeam}</strong> again
 			{:else}
-				Prompt for <strong>{currentPlayer}</strong> on <strong>Team {currentTeam}</strong>
+				Prompt for <strong>{currentPlayer}</strong> on <strong>Team {promptedTeam}</strong>
 			{/if}
 		</button>
 	</section>
@@ -394,11 +394,11 @@
 			<section style={`opacity: ${!turnFinished && awaitingSpeakerAnswer ? 0.75 : 1}`}>
 				<h3 style="margin-top: 8px;">Examiners' conclusion</h3>
 		
-				<p>Does <strong class={classForInterrogatingTeam}>Team {interrogatingTeam}</strong> think <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
+				<p>Does <strong class={classForInterrogatingTeam}>Team {interrogatingTeam}</strong> think <strong class={classForPromptedTeam}>{currentPlayer}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
 		
 				<!-- svelte-ignore a11y-label-has-associated-control -->
 				<label style="display: block;">
-					{#if currentTeam === "A"}
+					{#if promptedTeam === "A"}
 						<input type=radio bind:group={teamBAnswer} value={"pending"} style="margin-left: 0.25em;">
 					{:else}
 						<input type=radio bind:group={teamAAnswer} value={"pending"} style="margin-left: 0.25em;">
@@ -407,7 +407,7 @@
 				</label>
 				<!-- svelte-ignore a11y-label-has-associated-control -->
 				<label style="display: block;">
-					{#if currentTeam === "A"}
+					{#if promptedTeam === "A"}
 						<input type=radio bind:group={teamBAnswer} value={"truth"} style="margin-left: 0.25em;">
 					{:else}
 						<input type=radio bind:group={teamAAnswer} value={"truth"} style="margin-left: 0.25em;">
@@ -416,7 +416,7 @@
 				</label>
 				<!-- svelte-ignore a11y-label-has-associated-control -->
 				<label style="display: block;">
-					{#if currentTeam === "A"}
+					{#if promptedTeam === "A"}
 						<input type=radio bind:group={teamBAnswer} value={"lie"} style="margin-left: 0.25em;">			
 					{:else}
 						<input type=radio bind:group={teamAAnswer} value={"lie"} style="margin-left: 0.25em;">
@@ -429,7 +429,7 @@
 				<section>
 					<h3 style="margin-top: 8px;">Speaker's answer</h3>
 		
-					<p>Was <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement a <strong>truth</strong> or a <strong>lie</strong>?</p>
+					<p>Was <strong class={classForPromptedTeam}>{currentPlayer}</strong>'s statement a <strong>truth</strong> or a <strong>lie</strong>?</p>
 		
 					{#if !turnFinished}
 						<button
@@ -455,7 +455,7 @@
 		<section>
 			<h2>Continue</h2>
 
-			<p>Well done <span>Team {lastAwardedTeam}</span> for <span>{lastAwardedReason === "correct_answer" ? `correctly answering that the statement was a` : `tricking the opposing team into thinking the statement was a`}{currentTeamAnswer}!</span></p>
+			<p>Well done <span>Team {lastAwardedTeam}</span> for <span>{lastAwardedReason === "correct_answer" ? `correctly answering that the statement was a` : `tricking the opposing team into thinking the statement was a`}{promptedTeamAnswer}!</span></p>
 
 			{#if round % 2 === 0}
 				<p>There are normally 2-3 turns of Home Truths before the Quick-fire Lies round.</p>
