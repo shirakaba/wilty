@@ -12,6 +12,7 @@
 	let classForCurrentTeam: "purpleTeam"|"greenTeam";
 	let classForInterrogatingTeam: "purpleTeam"|"greenTeam";
 	let interrogatingTeam: "A"|"B";
+	let turnFinished: boolean = false;
 	$: {
 		interrogatingTeam = currentTeam === "A" ? "B" : "A";
 		classForCurrentTeam = currentTeam === "A" ? "purpleTeam" : "greenTeam";
@@ -29,7 +30,6 @@
 		teamACurrentPlayerIndex = playerOrder === "numeric" ? 0 : getRandomInt(0, playersOnTeamA.length - 1);
 	}
 	let teamAAnswer: "truth"|"lie"|"pending" = "pending";
-	let teamAReality: "truth"|"lie"|"pending" = "pending";
 
 	let playerB: number = 0;
 	let playersOnTeamB: string[] = ["Player 1B"];
@@ -42,7 +42,6 @@
 		teamBCurrentPlayerIndex = playerOrder === "numeric" ? 0 : getRandomInt(0, playersOnTeamB.length - 1);
 	}
 	let teamBAnswer: "truth"|"lie"|"pending" = "pending";
-	let teamBReality: "truth"|"lie"|"pending" = "pending";
 
 	let currentPlayer: string;
 	$:{
@@ -127,18 +126,18 @@
 		modalVisible = false;
 	}
 
-	function onSpeakersAnswer(): void {
+	function onSpeakersAnswer(reality: "truth"|"lie"): void {
 		// currentTeam means the team that have spoken the statement.
 		if(currentTeam === "A"){
 			// Team B are interrogating Team A.
-			if(teamBAnswer === teamAReality){
+			if(teamBAnswer === reality){
 				awardPointToTeam(interrogatingTeam, "correct_answer");
 			} else {
 				awardPointToTeam(currentTeam, "successful_trick");
 			}
 		} else {
 			// Team A are interrogating Team B.
-			if(teamAAnswer === teamBReality){
+			if(teamAAnswer === reality){
 				awardPointToTeam(interrogatingTeam, "correct_answer");
 			} else {
 				awardPointToTeam(currentTeam, "successful_trick");
@@ -147,6 +146,7 @@
 
 		// TODO: give host a button to choose either "next turn" or "next round".
 		// nextTurn();
+		turnFinished = true;
 	}
 
 	function awardPointToTeam(team: "A"|"B", dueTo: "correct_answer"|"successful_trick"): void {
@@ -192,8 +192,6 @@
 	function resetAnswers(): void {
 		teamAAnswer = "pending";
 		teamBAnswer = "pending";
-		teamAReality = "pending";
-		teamBReality = "pending";
 	}
 
 	function nextTurn(): void {
@@ -202,6 +200,7 @@
 		resetAnswers();
 		
 		rotatePlayer(interrogatingTeam);
+		turnFinished = false;
 		currentTeam = interrogatingTeam; // interrogatingTeam will switch reactively.
 	}
 
@@ -282,10 +281,9 @@
 		</section>
 	</details>
 
-	<h2>Game dashboard</h2>
-
 	<section>
-		<h3 style="margin-top: 8px;">Game status</h3>
+		<h2>Game dashboard</h2>
+		<!-- <h3 style="margin-top: 8px;">Game status</h3> -->
 
 		<table class="gameStatusTable">
 			<tr>
@@ -307,61 +305,6 @@
 		</table>
 	</section>
 
-	<!-- svelte-ignore a11y-label-has-associated-control -->
-	<section>
-		<h3 style="margin-top: 8px;">Examiners' conclusion</h3>
-
-		<p>Does <strong class={classForInterrogatingTeam}>Team {interrogatingTeam}</strong> think <strong class={classForCurrentTeam}>Team {currentTeam}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
-
-		<label style="display: block;">
-			{#if currentTeam === "A"}
-				<input type=radio bind:group={teamBAnswer} value={"pending"} style="margin-left: 0.25em;">
-			{:else}
-				<input type=radio bind:group={teamAAnswer} value={"pending"} style="margin-left: 0.25em;">
-			{/if}
-			Pending
-		</label>
-		<label style="display: block;">
-			{#if currentTeam === "A"}
-				<input type=radio bind:group={teamBAnswer} value={"truth"} style="margin-left: 0.25em;">
-			{:else}
-				<input type=radio bind:group={teamAAnswer} value={"truth"} style="margin-left: 0.25em;">
-			{/if}
-			Truth
-		</label>
-		<label style="display: block;">
-			{#if currentTeam === "A"}
-				<input type=radio bind:group={teamBAnswer} value={"lie"} style="margin-left: 0.25em;">			
-			{:else}
-				<input type=radio bind:group={teamAAnswer} value={"lie"} style="margin-left: 0.25em;">
-			{/if}
-			Lie
-		</label>
-	</section>
-
-	{#if (currentTeam === "A" && teamBAnswer !== "pending") || (currentTeam === "B" && teamAAnswer !== "pending")}
-		<section>
-			<h3 style="margin-top: 8px;">Speaker's answer</h3>
-
-			<p>Was <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement a <strong>truth</strong> or a <strong>lie</strong>?</p>
-
-			<button
-				class="truth"
-				on:click={(e) => {}}
-			>
-				Truth
-			</button>
-
-			<button
-				class="lie"
-				on:click={(e) => onSpeakersAnswer()}
-			>
-				Lie
-			</button>
-		</section>
-	{/if}
-
-
 	<!-- Home Truths: B2, A2 -->
 	<!-- QFLs: B1, B0,  -->
 
@@ -372,47 +315,138 @@
 	<!-- Home Truths: B2, A0, B0 -->
 	<!-- QFLs: B1, A1, B2, A2, A1  -->
 
-	{#if round % 2 === 0}
-		<h2>Home Truths</h2>
-
-		<p><strong>Home Truths</strong> is the opening round of the show.</p>
+	<section>
+		<h2>Start-of-round</h2>
 		
-		{#if currentTeam === "A"}
-			<button
-				class="purpleTeam"
-				on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
-			>
-				Prompt for <strong>{currentPlayer}</strong> on <strong>Team A</strong>
-			</button>
+		{#if round % 2 === 0}
+			<h3>Home Truths</h3>
+	
+			<p><strong>Home Truths</strong> is the opening round of the show.</p>
+			
+			{#if currentTeam === "A"}
+				<button
+					class="purpleTeam"
+					on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
+				>
+					Prompt for <strong>{currentPlayer}</strong> on <strong>Team A</strong>
+				</button>
+			{:else}
+				<button
+					class="greenTeam"
+					on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
+				>
+					Prompt for <strong>{currentPlayer}</strong> on <strong>Team B</strong>
+				</button>
+			{/if}
 		{:else}
-			<button
-				class="greenTeam"
-				on:click={(e) => prompt({ label: "Home Truths", commonStatements: homeTruthsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
-			>
-				Prompt for <strong>{currentPlayer}</strong> on <strong>Team B</strong>
-			</button>
+			<h2>Quick-fire Lies</h2>
+			
+			<p><strong>Quick-fire Lies</strong> is the second questioning round.</p>
+	
+			{#if currentTeam === "A"}
+				<button
+					class="purpleTeam"
+					on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
+				>
+					Prompt for <strong>{currentPlayer}</strong> on <strong>Team A</strong>
+				</button>
+			{:else}
+				<button
+					class="greenTeam"
+					on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
+				>
+					Prompt for <strong>{currentPlayer}</strong> on <strong>Team B</strong>
+				</button>
+			{/if}
 		{/if}
-	{:else}
-		<h2>Quick-fire Lies</h2>
-		
-		<p><strong>Quick-fire Lies</strong> is the second questioning round.</p>
+	</section>
 
-		{#if currentTeam === "A"}
-			<button
-				class="purpleTeam"
-				on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsA, playerIndex: playerA, team: "A" })}
-			>
-				Prompt for <strong>{currentPlayer}</strong> on <strong>Team A</strong>
-			</button>
-		{:else}
-			<button
-				class="greenTeam"
-				on:click={(e) => prompt({ label: "Quick-fire Lies", commonStatements: QFLsCommon, teamStatements: teamStatementsB, playerIndex: playerB, team: "B" })}
-			>
-				Prompt for <strong>{currentPlayer}</strong> on <strong>Team B</strong>
-			</button>
+	
+	<section>
+		<h2>End-of-round</h2>
+
+		<section>
+			<h3 style="margin-top: 8px;">Examiners' conclusion</h3>
+	
+			<p>Does <strong class={classForInterrogatingTeam}>Team {interrogatingTeam}</strong> think <strong class={classForCurrentTeam}>Team {currentTeam}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
+	
+			<!-- svelte-ignore a11y-label-has-associated-control -->
+			<label style="display: block;">
+				{#if currentTeam === "A"}
+					<input type=radio bind:group={teamBAnswer} value={"pending"} style="margin-left: 0.25em;">
+				{:else}
+					<input type=radio bind:group={teamAAnswer} value={"pending"} style="margin-left: 0.25em;">
+				{/if}
+				Pending
+			</label>
+			<!-- svelte-ignore a11y-label-has-associated-control -->
+			<label style="display: block;">
+				{#if currentTeam === "A"}
+					<input type=radio bind:group={teamBAnswer} value={"truth"} style="margin-left: 0.25em;">
+				{:else}
+					<input type=radio bind:group={teamAAnswer} value={"truth"} style="margin-left: 0.25em;">
+				{/if}
+				Truth
+			</label>
+			<!-- svelte-ignore a11y-label-has-associated-control -->
+			<label style="display: block;">
+				{#if currentTeam === "A"}
+					<input type=radio bind:group={teamBAnswer} value={"lie"} style="margin-left: 0.25em;">			
+				{:else}
+					<input type=radio bind:group={teamAAnswer} value={"lie"} style="margin-left: 0.25em;">
+				{/if}
+				Lie
+			</label>
+		</section>
+
+		{#if (currentTeam === "A" && teamBAnswer !== "pending") || (currentTeam === "B" && teamAAnswer !== "pending")}
+			<section>
+				<h3 style="margin-top: 8px;">Speaker's answer</h3>
+	
+				<p>Was <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement a <strong>truth</strong> or a <strong>lie</strong>?</p>
+	
+				<button
+					class="truth"
+					on:click={(e) => onSpeakersAnswer("truth")}
+				>
+					Truth
+				</button>
+	
+				<button
+					class="lie"
+					on:click={(e) => onSpeakersAnswer("lie")}
+				>
+					Lie
+				</button>
+			</section>
 		{/if}
-	{/if}	
+
+		{#if turnFinished}
+			<section>
+				<h3>Continue</h3>
+	
+				{#if round % 2 === 0}
+					<p>There are normally 2-3 turns of Home Truths before the Quick-fire Lies round.</p>
+				{:else}
+					<p>There are normally 3-4 turns of Quick-fire lies before the Home Truths round.</p>
+				{/if}
+	
+				<p>This will of course depend on the time taken by the answerers; normally about ten minutes is allocated to the round.</p>
+	
+				<button
+					on:click={(e) => nextTurn()}
+				>
+					Next Turn
+				</button>
+	
+				<button
+					on:click={(e) => nextRound()}
+				>
+					Next Round
+				</button>
+			</section>
+		{/if}
+	</section>
 
 	<footer>
 		<em><small>This website is not affiliated with <em>Would I Lie to You?</em>.</small></em>
