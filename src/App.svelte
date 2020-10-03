@@ -54,7 +54,7 @@
 	}
 	let promptedTeamAnswer: "truth"|"lie"|"pending";
 	$: {
-		promptedTeam === "A" ? teamAAnswer : teamBAnswer;
+		promptedTeamAnswer = promptedTeam === "A" ? teamBAnswer : teamAAnswer;
 	}
 	let awaitingSpeakerAnswer: boolean;
 	$: {
@@ -427,7 +427,7 @@
 
 			{#if awaitingSpeakerAnswer}
 				<section>
-					<h3 style="margin-top: 8px;">Speaker's answer</h3>
+					<h3 style="margin-top: 8px;">Prompted player's answer</h3>
 		
 					<p>Was <strong class={classForPromptedTeam}>{currentPlayer}</strong>'s statement a <strong>truth</strong> or a <strong>lie</strong>?</p>
 		
@@ -455,15 +455,13 @@
 		<section>
 			<h2>Continue</h2>
 
-			<p>Well done <span>Team {lastAwardedTeam}</span> for <span>{lastAwardedReason === "correct_answer" ? `correctly answering that the statement was a` : `tricking the opposing team into thinking the statement was a`}{promptedTeamAnswer}!</span></p>
+			<p>Well done <span class={lastAwardedTeam === "A" ? "purpleTeam" : "greenTeam"}>Team {lastAwardedTeam}</span> for <span>{lastAwardedReason === "correct_answer" ? `correctly answering that the statement was ` : `tricking the opposing team into thinking the statement was `}{promptedTeamAnswer === "truth" ? "the truth" : "a lie"}!</span></p>
 
-			{#if round % 2 === 0}
-				<p>There are normally 2-3 turns of Home Truths before the Quick-fire Lies round.</p>
+			{#if roundName === "Home Truths"}
+				<p>The <strong>{roundName}</strong> round usually lasts ten minutes, or 2-3 turns.</p>
 			{:else}
-				<p>There are normally 3-4 turns of Quick-fire lies before the Home Truths round.</p>
+				<p>The <strong>{roundName}</strong> round usually lasts ten minutes, or 3-4 turns.</p>
 			{/if}
-
-			<p>This will of course depend on the time taken by the answerers; normally about ten minutes is allocated to the round.</p>
 
 			<button
 				on:click={(e) => nextTurn()}
@@ -474,7 +472,7 @@
 			<button
 				on:click={(e) => nextRound()}
 			>
-				Next Round
+				Next Round (<strong>{roundName === "Home Truths" ? "Quick-fire Lies" : "Home Truths"}</strong>)
 			</button>
 		</section>
 	{/if}
