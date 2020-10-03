@@ -287,8 +287,17 @@
 
 		<table class="gameStatusTable">
 			<tr>
-				<th colspan="2">Round</th>
-				<td>{round + 1} ({round % 2 === 0 ? "Home Truths" : "Quick-fire Lies"})</td>
+				<th rowspan="2">Round</th>
+				<th>№</th>
+				<td>
+					<span>{round + 1}</span>
+				</td>
+			</tr>
+			<tr>
+				<th>Name</th>
+				<td>
+					<span>{round % 2 === 0 ? "Home Truths" : "Quick-fire Lies"}</span>
+				</td>
 			</tr>
 			<tr>
 				<th colspan="2">Turn</th>
@@ -381,7 +390,7 @@
 		<section>
 			<h3 style="margin-top: 8px;">Examiners' conclusion</h3>
 	
-			<p>Does <strong class={classForInterrogatingTeam}>Team {interrogatingTeam}</strong> think <strong class={classForCurrentTeam}>Team {currentTeam}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
+			<p>Does <strong class={classForInterrogatingTeam}>Team {interrogatingTeam}</strong> think <strong class={classForCurrentTeam}>{currentPlayer}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
 	
 			<!-- svelte-ignore a11y-label-has-associated-control -->
 			<label style="display: block;">
