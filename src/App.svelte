@@ -19,20 +19,20 @@
 	let promptCommitted: boolean = false;
 	$: {
 		if(promptCommitted){
-			// Lazy way of scrolling "Examiners' conclusion" into view.
 			requestAnimationFrame(() => {
-				window.scrollTo(0, document.body.scrollHeight);
+				document.getElementById("examiners_conclusion").scrollIntoView({ behavior: "smooth"});
 			});
 		}
 	}
 	let turnFinished: boolean = false;
 	$:{
-		if(turnFinished){
-			// Lazy way of scrolling "Continue" into view.
-			requestAnimationFrame(() => {
-				window.scrollTo(0, document.body.scrollHeight);
-			});
-		}
+		requestAnimationFrame(() => {
+			if(turnFinished){
+				document.getElementById("continue").scrollIntoView({ behavior: "smooth"});
+			} else {
+				document.getElementById("start_of_round").scrollIntoView({ behavior: "smooth"});
+			}
+		});
 	}
 	$: {
 		interrogatingTeam = promptedTeam === "A" ? "B" : "A";
@@ -76,9 +76,8 @@
 	$: {
 		awaitingSpeakerAnswer = (promptedTeam === "A" && teamBAnswer !== "pending") || (promptedTeam === "B" && teamAAnswer !== "pending");
 		if(awaitingSpeakerAnswer){
-			// Lazy way of scrolling "Prompted player's answer" into view.
 			requestAnimationFrame(() => {
-				window.scrollTo(0, document.body.scrollHeight);
+				document.getElementById("prompted_player_answer").scrollIntoView({ behavior: "smooth"});
 			});
 		}
 	}
@@ -381,7 +380,7 @@
 	<!-- QFLs: B1, A1, B2, A2, A1  -->
 
 	<section style={`opacity: ${promptCommitted ? 0.75 : 1}`}>
-		<h2>Start-of-round</h2>
+		<h2 id="start_of_round">Start-of-round</h2>
 		
 		<h3>{roundName}</h3>
 
@@ -414,7 +413,7 @@
 			<h2>End-of-round</h2>
 
 			<section style={`opacity: ${!turnFinished && awaitingSpeakerAnswer ? 0.75 : 1}`}>
-				<h3 style="margin-top: 8px;">Examiners' conclusion</h3>
+				<h3 id="examiners_conclusion" style="margin-top: 8px;">Examiners' conclusion</h3>
 		
 				<p>Does <strong class={classForInterrogatingTeam}>Team {interrogatingTeam}</strong> think <strong class={classForPromptedTeam}>{currentPlayer}</strong>'s statement is a <strong>truth</strong> or a <strong>lie</strong>?</p>
 		
@@ -449,7 +448,7 @@
 
 			{#if awaitingSpeakerAnswer}
 				<section>
-					<h3 style="margin-top: 8px;">Prompted player's answer</h3>
+					<h3 id="prompted_player_answer" style="margin-top: 8px;">Prompted player's answer</h3>
 		
 					<p>Was <strong class={classForPromptedTeam}>{currentPlayer}</strong>'s statement a <strong>truth</strong> or a <strong>lie</strong>?</p>
 		
@@ -475,7 +474,7 @@
 
 	{#if turnFinished}
 		<section>
-			<h2>Continue</h2>
+			<h2 id="continue">Continue</h2>
 
 			<p>Well done <span class={lastAwardedTeam === "A" ? "purpleTeam" : "greenTeam"}>Team {lastAwardedTeam}</span> for <span>{lastAwardedReason === "correct_answer" ? `correctly answering that the statement was ` : `tricking the opposing team into thinking the statement was `}{promptedTeamAnswer === "truth" ? "the truth" : "a lie"}!</span></p>
 
